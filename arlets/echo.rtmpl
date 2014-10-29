@@ -1,0 +1,11 @@
+# r-fu arlet template
+#
+# Simple example showing (optionally) how to read arguments passed in by r-fu;
+# the alternative would be to template these via <: $args[0] :>.
+#
+#   $ r-fu echo hi there
+#   [1] "hi"    "there"
+#   $ r-fu --show-code echo Text::Xslate
+
+args=commandArgs(trailingOnly=TRUE)
+args

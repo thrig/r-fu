@@ -7,6 +7,9 @@
 # This program is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself.
 
+local adir
+adir=${ARLET_DIR:-~/share/arlets}
+
 # More complexity would be required to specify completions for the individual
 # arlet files. Easy would be a 'usage' line in the arlet.conf that r-fu could
 # emit when anything goes awry.
@@ -15,6 +18,6 @@ _arguments -s \
   '(--help -h)--height=[graph height]:value:' \
   '(--help -h)--show-code[only show R code]' \
   '(- *)'{-h,--help}'[display help]' \
-  '1:arlet:_files -g "*.rtmpl(:rt)" -W $HOME/share/arlets' \
+  '1:arlet:_files -g "*.rtmpl(:rt)" -W $adir' \
   '*:files:_files' \
   && return 0
