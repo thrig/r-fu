@@ -41,6 +41,8 @@ my $arlet_file = "$arlet.rtmpl";
 # clobbered by anything read somehow as an option.
 my %template = ( width => 7, height => 7 );
 
+my $hide_stdout = 0;
+
 # Should use Config:: something but didn't have any installed on my laptop at
 # time of writing nor Internet access, so going with (the predictably buggy)
 # "simple INI style in a hurry" method.
@@ -51,6 +53,9 @@ my %template = ( width => 7, height => 7 );
       if ( $line =~ m/^([^=]+)=(.*)/ ) {
         $template{$1} = $2;
       }
+    }
+    if (exists $template{no_stdout}) {
+      $hide_stdout = $template{no_stdout};
     }
   }
 }
@@ -90,8 +95,9 @@ if ($@) {
 if ( $? >> 8 != 0 ) {
   warn "$Prog_Name: R command: @R_Command\n";
   warn $stderr;
+  $hide_stdout = 0;
 }
-print $stdout;
+print $stdout unless $hide_stdout;
 exit $?;
 
 sub emit_help {
@@ -121,7 +127,7 @@ r-fu - template and feed named code templates to R
 =head1 DESCRIPTION
 
 C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code
-plus optional configuration files with defaults) through R.
+plus optional configuration files with defaults) through R. 
 
 =head1 USAGE
 
@@ -157,6 +163,18 @@ L<Text::Xslate> is used to template the arlets; see
 L<Text::Xslate::Syntax::Kolon> for the template format. The C<arlets> directory
 might be good to study as well.
 
+=head2 Config File
+
+Arlets may have an optional C<*.conf> file; this is parsed only for
+C<key=value> lines that are added to the template parameters; one exception is
+the C<no_stdout> line, which can be set to a "true" value for Perl to hide
+standard out from R, which otherwise is shown by default (or under error
+conditions):
+
+  no_stdout=1
+
+This is suitable to set for arlets that only produce some graphics file.
+
 =head1 BUGS
 
 =head2 Reporting Bugs
@@ -174,6 +192,8 @@ Buggy arlet code will doubtless cause R to blow up in strange ways. Doubtless
 other things besides.
 
 =head1 SEE ALSO
+
+L<http://www.r-project.org/>
 
 L<Text::Xslate>
 

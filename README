@@ -1,6 +1,6 @@
-`r-fu` is a wrapper around R that provides a means to toss arbitrary data sets
-at named R code templates that are fed to R. See the "arlets" directory for the
-available templates of R code.
+`r-fu` is a wrapper around R (http://www.r-project.org) that provides a means
+to toss arbitrary data sets at named R code templates that are fed to R. See
+the "arlets" directory for the available templates of R code.
 
 Assuming that all the required Perl modules are installed from CPAN, a quick
 test might look like:
