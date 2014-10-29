@@ -1,0 +1,45 @@
+`r-fu` is a wrapper around R that provides a means to toss arbitrary data sets
+at named R code templates that is templated and then fed to R. See the "arlets"
+directory for the available templates of R code.
+
+An install under a home directory might look something like:
+
+  cp r-fu ~/bin
+  mkdir ~/share
+  cp -r arlets ~/share
+
+  # only on ZSH, $fpath may need customization, etc.
+  cp _r-fu $fpath[0]   
+
+Or otherwise fiddle with the paths (and possibly the source code for the arlets
+directory) if other paths are desired. Then read the docs on r-fu for more
+information:
+
+  perldoc r-fu
+
+Motivation for this NIH system: other options, such as learning R more soas to
+be comfortable in its REPL, or using some webby thing or knitr, do not suit the
+Unix + Perl + C environment I spend most of my time in, and my prior practice
+of copying and pasting random R commands from who knows where did not promote
+proper scriptability.
+
+
+Output Format Ruminations for the Curious
+-----------------------------------------
+
+Experimented with quartz rendering for Mac OS X:
+
+  quartz(width=7, height=7, bg="white");
+  quartzFonts(sans = quartzFont(rep("Verdana", 4)))
+  ...
+  quartz.save("r-out.png", type="png", device=dev.cur(), dpi=100)
+
+though that flashes up a temporary screen when rendering, and steals focus
+thereafter from the terminal, so is not ideal. PNG output includes thin, ugly
+fonts, so avoiding that.
+
+  png(file="r-out.png", bg="white", width=699, height=699)
+
+PDF output looks decent, so going with that. This could, of course, be changed
+by fiddling with the code in the arlets. Of course, the arlet code could emit
+plaintext to standard out, or do whatever.

@@ -1,0 +1,5 @@
+r-fu arlets directory. These are templates that get filled in with options or
+arguments to r-fu (plus perhaps configuration from the optional *.conf file),
+then fed to R. See r-fu for details of how R is run, then study the existing
+templates and check the output of `r-fu --show-code ...` to audit that the
+template is being filled in properly.

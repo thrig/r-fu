@@ -1,0 +1,184 @@
+#!/usr/bin/env perl
+#
+# R wrapper script to help apply named "arlets" (templated R code plus optional
+# configuration files with defaults) against hopefully appropriate input data
+# and write the hopefully appropriate output data required from running said
+# templated R code through R itself.
+#
+# Run perldoc(1) on this file for additional documentation.
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the same terms as Perl itself.
+
+use strict;
+use warnings;
+
+use File::Basename qw(basename);
+use File::HomeDir ();
+use File::Spec    ();
+use Getopt::Long qw(GetOptions);
+use IPC::Run3 qw(run3);
+use Text::Xslate ();
+
+my $Prog_Name = basename($0);
+my @R_Command = qw(R --encoding=UTF-8 --no-restore --no-save --quiet --slave);
+
+GetOptions(
+  'help|h|?'  => \&emit_help,
+  'width=f'   => \my $Flag_Width,
+  'height=f'  => \my $Flag_Height,
+  'show-code' => \my $Flag_Show_Code,
+) or do { warn "$Prog_Name: error parsing options\n"; emit_help() };
+
+my $arlet = shift or emit_help();
+my $arlet_file = "$arlet.rtmpl";
+
+# Global defaults, clobbered by anything in the (optional!) *.conf file,
+# clobbered by anything read somehow as an option.
+my %template = ( width => 7, height => 7 );
+
+# Should use Config:: something but didn't have any installed on my laptop
+# at time of writing nor Internet access, so going with "simple INI style in
+# a hurry"
+open my $config, '<',
+  File::Spec->catfile( File::HomeDir->my_home, "share/arlets", "$arlet.conf" );
+if ( defined $config ) {
+  while ( my $line = readline $config ) {
+    if ( $line =~ m/^([^=]+)=(.*)/ ) {
+      $template{$1} = $2;
+    }
+  }
+}
+
+if ( defined $Flag_Width ) {
+  $template{width} = $Flag_Width;
+}
+if ( defined $Flag_Height ) {
+  $template{height} = $Flag_Height;
+}
+# Anything remaining past the arlet name passed to template
+$template{args} = \@ARGV;
+
+my $tx =
+  Text::Xslate->new(
+  path => [ File::Spec->catfile( File::HomeDir->my_home, "share/arlets" ) ] );
+my $rcode = $tx->render( $arlet_file, \%template );
+
+if ($Flag_Show_Code) {
+  print $rcode;
+  exit;
+}
+
+my ( $stdout, $stderr );
+
+# run3 will either blow up, or set something non-zero in $? if something went
+# awry, so pass whatever that is along. But do need to show anything from R if
+# things go awry for ease of debugging; otherwise remain silent (no news is
+# good news).
+eval { run3 \@R_Command, \$rcode, \$stdout, \$stderr; };
+if ($@) {
+  warn "$Prog_Name: R command: @R_Command\n";
+  warn "$Prog_Name: run3() failed: $@\n";
+  exit 1;
+}
+if ( $? >> 8 != 0 ) {
+  warn "$Prog_Name: R command: @R_Command\n";
+  warn $stderr;
+  print $stdout;
+}
+exit $?;
+
+sub emit_help {
+  warn
+    "Usage: $Prog_Name [--width=f] [--height=f] [--show-code] arlet [arletargs ..]";
+  exit 64;
+}
+
+__END__
+
+=head1 NAME
+
+r-fu - template and feed named code templates to R
+
+=head1 SYNOPSIS
+
+  $ cat times
+  1000 0.0024
+  2000 0.0077
+  4000 0.0306
+  8000 0.1258
+  16000 0.4815
+  32000 1.8844
+  $ r-fu timecomplex times out.pdf
+  $ open out.pdf
+
+=head1 DESCRIPTION
+
+C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code
+plus optional configuration files with defaults) through R.
+
+=head1 USAGE
+
+  $ r-fu [options] arlet [arletargs ..]
+
+This program supports the following command line switches:
+
+=over 4
+
+=item B<--width>=I<float>
+
+Width of the resulting graph (if any).
+
+=item B<--height>=I<float>
+
+Width of the resulting graph (if any).
+
+=item B<--show-code>
+
+Does not run R; instead shows the templated R code that would be passed to R on
+standard out.
+
+=back
+
+=head1 ARLETS
+
+Templates to be filled in and passed to R, plus an optional C<*.conf> with
+template defaults (e.g. for width and height). These need to be located in a
+directory that C<r-fu> is configured to look in (see the source), and
+possibly also the C<_r-fu> ZSH completion script configured to consult that
+directory as well.
+
+L<Text::Xslate> is used to template the arlets; see
+L<Text::Xslate::Syntax::Kolon> for the template format. The C<arlets> directory
+might be good to study as well.
+
+=head1 BUGS
+
+=head2 Reporting Bugs
+
+Newer versions of this program may be available from:
+
+http://github.com/thrig/r-fu
+
+If the bug is in the latest version, send a report to the author.
+Patches that fix problems or add new features are welcome.
+
+=head2 Known Issues
+
+Buggy arlet code will doubtless cause R to blow up in strange ways. Doubtless
+other things besides.
+
+=head1 SEE ALSO
+
+L<Text::Xslate>
+
+=head1 AUTHOR
+
+thrig - Jeremy Mates (cpan:JMATES) C<< <jmates at cpan.org> >>
+
+=head1 COPYRIGHT
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
