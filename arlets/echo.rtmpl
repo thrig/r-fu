@@ -1,4 +1,4 @@
-# r-fu arlet template
+# r-fu arlet template - install to ARLET_DIR directory
 #
 # Simple example showing (optionally) how to read arguments passed in by r-fu;
 # the alternative would be to template these via <: $args[0] :>.

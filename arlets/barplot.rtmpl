@@ -1,0 +1,19 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# barplot data. Usage:
+#
+#   r-fu barplot datfile out.pdf
+#   ... | r-fu barplot - out.pdf
+#
+# For example, rough word-length frequencies from the filenames matching 'ch*':
+#
+#   perl -nle 'print length for m/([\w\047]+)/g' ch* \
+#   | r-fu barplot - out.pdf && open out.pdf
+
+pdf(file="<: $args[1] :>", bg="white", width=<: $width :>, height=<: $height :>)
+
+thedat=read.table("<: $args[0] :>")
+
+barplot(table(thedat));
+
+dev.off()

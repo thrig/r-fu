@@ -1,4 +1,4 @@
-# r-fu arlet template
+# r-fu arlet template - install to ARLET_DIR directory
 #
 # Graphs time complexity numbers in both normal and log-log form plus reference
 # graphs for linear, square, cubic, and quadratic fits. Sample input data for

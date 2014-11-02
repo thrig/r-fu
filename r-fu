@@ -16,6 +16,7 @@ use warnings;
 use File::Basename qw(basename);
 use File::HomeDir ();
 use File::Spec    ();
+use File::Temp    ();
 use Getopt::Long qw(GetOptions);
 use IPC::Run3 qw(run3);
 use Text::Xslate ();
@@ -26,6 +27,7 @@ my @R_Command =
   qw(R --encoding=UTF-8 --no-restore --no-save --quiet --slave --args);
 
 my $Prog_Name = basename($0);
+my $Tmp_Fh;
 
 GetOptions(
   'help|h|?'  => \&emit_help,
@@ -42,6 +44,11 @@ my $arlet_file = "$arlet.rtmpl";
 my %template = ( width => 7, height => 7 );
 
 my $hide_stdout = 0;
+my $read_stdin  = 1;
+
+##############################################################################
+#
+# MAIN
 
 # Should use Config:: something but didn't have any installed on my laptop at
 # time of writing nor Internet access, so going with (the predictably buggy)
@@ -54,8 +61,11 @@ my $hide_stdout = 0;
         $template{$1} = $2;
       }
     }
-    if (exists $template{no_stdout}) {
+    if ( exists $template{no_stdout} ) {
       $hide_stdout = $template{no_stdout};
+    }
+    if ( exists $template{no_stdin} ) {
+      $read_stdin = $template{no_stdin};
     }
   }
 }
@@ -66,6 +76,25 @@ if ( defined $Flag_Width ) {
 if ( defined $Flag_Height ) {
   $template{height} = $Flag_Height;
 }
+
+# For `... | r-fu ...` support; stdin used to feed R code to R, so must create
+# temporary file, and try to find a conventional "-" to replace with the
+# temporary filename for the R code to then presumably read. (Another option
+# might be to template the data from stdin into the R code directly, but that's
+# more work.)
+if ($read_stdin) {
+  if ( !@ARGV ) {
+    push @ARGV, stdin2tmpfile();
+  } else {
+    for my $arg (@ARGV) {
+      if ( $arg eq '-' ) {
+        $arg = stdin2tmpfile();
+        last;
+      }
+    }
+  }
+}
+
 # Anything remaining past the arlet name passed to template
 $template{args} = \@ARGV;
 
@@ -100,10 +129,23 @@ if ( $? >> 8 != 0 ) {
 print $stdout unless $hide_stdout;
 exit $?;
 
+##############################################################################
+#
+# SUBROUTINES
+
 sub emit_help {
   warn
     "Usage: $Prog_Name [--width=f] [--height=f] [--show-code] arlet [arletargs ..]";
   exit 64;
+}
+
+sub stdin2tmpfile {
+  $Tmp_Fh =
+    File::Temp->new( TMPDIR => 1, TEMPLATE => "$Prog_Name.stdin.XXXXXXXXXX" );
+  $Tmp_Fh->print($_) while readline STDIN;
+  $Tmp_Fh->flush;
+  $Tmp_Fh->sync;
+  return $Tmp_Fh->filename;
 }
 
 __END__
@@ -174,6 +216,14 @@ conditions):
   no_stdout=1
 
 This is suitable to set for arlets that only produce some graphics file.
+Another option determines whether standard input to C<r-fu> is used:
+
+  no_stdin=1
+
+would turn off the default handling of standard input, which is to copy that
+data to a temporary file, and if the argument list is empty, append that
+filename to the command arguments; or, if the argument list is not empty, the
+first C<-> in that list will be replaced with the temporary filename.
 
 =head1 BUGS
 
