@@ -166,6 +166,21 @@ r-fu - template and feed named code templates to R
   $ r-fu timecomplex times out.pdf
   $ open out.pdf
 
+Or, reading from standard input (and temporary files):
+
+  $ r-fu timecomplex - out.pdf < times
+
+Or, to see the code that would be passed to R:
+
+  $ r-fu --show-code timecomplex times out.pdf
+
+Or, to then fuss around with this data in R:
+
+  $ r-fu --show-code timecomplex times out.pdf > rc
+  $ R
+  > source("rc")
+  > str(thedat)
+
 =head1 DESCRIPTION
 
 C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code
