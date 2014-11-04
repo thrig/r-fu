@@ -3,7 +3,8 @@
 # R wrapper script that applies named "arlets" (templated R code plus optional
 # configuration files with defaults) against hopefully appropriate input data
 # and write the hopefully appropriate output data required from running said
-# templated R code through R itself.
+# templated R code through R itself. Basically some glue to help make R work
+# better from the unix command line (or Makefile, etc.) environment.
 #
 # Run perldoc(1) on this file for additional documentation.
 #
@@ -173,18 +174,21 @@ Or, reading from standard input (and temporary files):
 Or, to see the code that would be passed to R:
 
   $ r-fu --show-code timecomplex times out.pdf
+  ...
 
 Or, to then fuss around with this data in R:
 
   $ r-fu --show-code timecomplex times out.pdf > rc
   $ R
   > source("rc")
-  > str(thedat)
+  > ...
 
 =head1 DESCRIPTION
 
-C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code
-plus optional configuration files with defaults) through R. 
+C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code plus
+optional configuration files with defaults) through R. Basically some glue to
+help make R work better from the unix command line (or Makefile, etc.)
+environment.
 
 =head1 USAGE
 
@@ -205,7 +209,8 @@ Width of the resulting graph (if any).
 =item B<--show-code>
 
 Does not run R; instead shows the templated R code that would be passed to R on
-standard out.
+standard out. This code, as shown above, could then be read into an R REPL via
+C<source>, for example.
 
 =back
 
@@ -256,11 +261,23 @@ Patches that fix problems or add new features are welcome.
 Buggy arlet code will doubtless cause R to blow up in strange ways. Doubtless
 other things besides.
 
+The graphics device prints some random messages, would be nice to find a way to
+turn those off, so arlet code could generate both a graph and make unpolluted
+output to standard out.
+
 =head1 SEE ALSO
 
 L<http://www.r-project.org/>
 
-L<Text::Xslate>
+Template system for the arlets:
+
+L<Text::Xslate>, <Text::Xslate::Syntax::Kolon> 
+
+Other R projects in the same vein:
+
+L<http://yihui.name/knitr/>
+
+L<http://www.rstudio.com/>
 
 =head1 AUTHOR
 

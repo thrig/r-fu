@@ -1,15 +1,23 @@
 `r-fu` is a wrapper around R (http://www.r-project.org) that provides a means
 to toss arbitrary data sets at named R code templates that are fed to R. See
-the "arlets" directory for the available templates of R code.
+the "arlets" directory for the available templates of R code. Basically this is
+some glue to help make R work better from the unix command line (or Makefile,
+etc.) environment.
 
-Assuming that all the required Perl modules are installed from CPAN, a quick
-test might look like:
+Assuming that all the required Perl modules are installed from CPAN (r-fu will
+complain about these if they are not installed), a quick test might look like:
 
   $ env ARLET_DIR=arlets ./r-fu echo test
   [1] "test"
 
+Or, perhaps more interesting:
+
+  awk '{print length}' /usr/share/dict/words \
+  | env ARLET_DIR=arlets r-fu barplot - out.pdf
+
 While a proper install under a home directory might look something like:
 
+  # assuming ~/bin exists and is in $PATH
   cp r-fu ~/bin
 
   # or some other dir and exporting ARLET_DIR, etc.
