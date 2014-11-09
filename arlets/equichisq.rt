@@ -16,4 +16,5 @@
 thedat=read.table("<: $args[0] :>")
 tab=table(thedat)
 
+sprintf("elements %d unique %d", length(thedat$V1), length(tab))
 chisq.test(tab, p=rep(1/length(tab), length(tab)))
