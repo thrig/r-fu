@@ -38,7 +38,7 @@ GetOptions(
 ) or do { warn "$Prog_Name: error parsing options\n"; emit_help() };
 
 my $arlet = shift or emit_help();
-my $arlet_file = "$arlet.rtmpl";
+my $arlet_file = "$arlet.rt";
 
 # Global defaults, clobbered by anything in the (optional!) *.conf file,
 # clobbered by anything read somehow as an option.

@@ -16,7 +16,7 @@ thedat=read.table("<: $args[0] :>")
 # like this better than boxy barplot, also easier to put the quantile stuff
 # on top of...
 plot(table(thedat),type='h',bty='n',xlab='Value',ylab='Frequency',tcl=-0.25)
-rect(quantile(thedat$V1, probs=c(0.25),names=FALSE), 0, quantile(thedat$V1,probs=c(0.75),names=FALSE), 0, lwd=2)
+rect(quantile(thedat$V1, probs=c(0.25),names=FALSE), 0, quantile(thedat$V1,probs=c(0.75),names=FALSE), -100, lwd=2,col='grey')
 rect(mean(thedat$V1), 0, mean(thedat$V1), -1000, lwd=2)
 
 dev.off()

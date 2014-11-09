@@ -18,6 +18,6 @@ _arguments -s \
   '(--help -h)--height=[graph height]:value:' \
   '(--help -h)--show-code[only show R code]' \
   '(- *)'{-h,--help}'[display help]' \
-  '1:arlet:_files -g "*.rtmpl(:rt)" -W $adir' \
+  '1:arlet:_files -g "*.rt(:rt)" -W $adir' \
   '*:files:_files' \
   && return 0
