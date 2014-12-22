@@ -43,7 +43,7 @@ quads$y = mean( thedat$y / (thedat$x ** 4) ) * quads$x ** 4
 
 par(mfcol=c(1,2))
 
-plot(thedat,type='n',bty='n',ylab='Time',xlab='Operations',tcl=-0.25)
+plot(thedat$x,thedat$y,type='n',bty='n',ylab='Time',xlab='Operations',tcl=-0.25)
 
 # hmmm. placing stuff is tricky.
 #text(linear$x[length(linear$x)], linear$y[length(linear$y)], "linear", pos=2, cex=0.66, col='#666666')
@@ -55,7 +55,7 @@ lines(cubes,lty=3,col='#333333',lwd=1)
 lines(quads,lty=4,col='#333333',lwd=1)
 lines(thedat,type='b',pch=20,lwd=2)
 
-plot(thedat,type='n',log="xy",bty='n',ylab='log',xlab='log',tcl=-0.25)
+plot(thedat$x,thedat$y,type='n',log="xy",bty='n',ylab='log',xlab='log',tcl=-0.25)
 lines(linear,col='#333333',lwd=1)
 lines(sqs,lty=2,col='#333333',lwd=1)
 lines(cubes,lty=3,col='#333333',lwd=1)
