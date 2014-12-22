@@ -8,5 +8,6 @@
 thedat=read.table("<: $args[0] :>", blank.lines.skip=TRUE)
 
 hilo=range(thedat$V1)
-sprintf("elements %d mean %.3f range %.3f sd %.3f", length(thedat$V1), mean(thedat$V1), hilo[2] - hilo[1], sd(thedat$V1))
-quantile(thedat$V1, probs=seq(0,1,0.25), names=TRUE, type=8)
+cat(sprintf("elements %d mean %.3f range %.3f sd %.3f\n\n", length(thedat$V1), mean(thedat$V1), hilo[2] - hilo[1], sd(thedat$V1)))
+noquote(quantile(thedat$V1, probs=seq(0,1,0.25), names=TRUE, type=8))
+cat("\n")
