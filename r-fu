@@ -271,9 +271,13 @@ L<http://www.r-project.org/>
 
 Template system for the arlets:
 
-L<Text::Xslate>, <Text::Xslate::Syntax::Kolon> 
+L<Text::Xslate>, using the <Text::Xslate::Syntax::Kolon> format.
 
-Other R projects in the same vein:
+Another option for doing R from Perl:
+
+L<Statistics::NiceR>
+
+And other R projects in the same vein:
 
 L<http://yihui.name/knitr/>
 
