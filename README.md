@@ -15,7 +15,7 @@ complain about these if they are not installed), a quick test might look like:
 Or, perhaps more interesting:
 
     awk '{print length}' /usr/share/dict/words \
-    | env ARLET_DIR=arlets r-fu barplot - out.pdf
+    | env ARLET_DIR=arlets ./r-fu barplot - out.pdf
 
 While a proper install under a home directory might look something like:
 
