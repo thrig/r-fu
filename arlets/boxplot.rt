@@ -9,6 +9,8 @@ pdf(file="<: $args[1] :>", bg="white", width=<: $width :>, height=<: $height :>)
 
 thedat=read.table("<: $args[0] :>")
 
-boxplot(thedat,horizontal=TRUE,frame.plot=FALSE,boxlwd=2,staplelwd=2,whisklwd=2,medlwd=5);
+y=boxplot(thedat,horizontal=TRUE,frame.plot=FALSE,boxlwd=2,staplelwd=2,whisklwd=2,medlwd=5);
+
+y
 
 dev.off()

@@ -21,6 +21,8 @@ names(thedat)=c("x")
 
 newdat=subset(thedat,!(thedat$x > quantile(thedat$x, probs=c(min, max))[2] | thedat$x < quantile(thedat$x, probs=c(min, max))[1]))
 
-boxplot(newdat,horizontal=TRUE,frame.plot=FALSE,boxlwd=2,staplelwd=2,whisklwd=2,medlwd=5);
+y=boxplot(newdat,horizontal=TRUE,frame.plot=FALSE,boxlwd=2,staplelwd=2,whisklwd=2,medlwd=5);
+
+y
 
 dev.off()
