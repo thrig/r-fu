@@ -12,6 +12,10 @@
 #   perl -E 'say for 1..6' | r-fu equichisq
 #
 # while any lower value points to some amount of skew from that ideal.
+#
+# NOTE that this calculation may give misleading results if the input is
+# sparse, e.g. a six-sided die that for some reason never rolls six but
+# is otherwise normal.
 
 thedat=read.table("<: $args[0] :>")
 tab=table(thedat)
