@@ -98,6 +98,7 @@ if ($read_stdin) {
 
 # Anything remaining past the arlet name passed to template
 $template{args} = \@ARGV;
+$template{argcount} = @ARGV;
 
 my $tx = Text::Xslate->new( path => [$Arlet_Dir] );
 my $rcode = $tx->render( $arlet_file, \%template );
