@@ -15,11 +15,9 @@
 # above, perhaps something like
 #
 #  awk '{print $7, $12, $14}' datfile | tr -d a-z | r-fu colsumm - ops/s cpu/op latency
-
-meansdetc = function(d) {
-  hilo=range(d)
-  return(c( length(d), hilo[2]-hilo[1], mean(d), sd(d) ))
-}
+#
+# TODO transposing the output rows and columns may be necessary if there
+# is a very large number of columns, and not-wide output is desired.
 
 thedat=read.table("<: $args[0] :>", blank.lines.skip=TRUE)
 
@@ -37,4 +35,9 @@ names(thedat)=c(
 )
 : }
 
-print(vapply(thedat, meansdetc, c(Count=0, Range=0, Mean=0, Sdev=0)))
+meansdetc = function(d) {
+  hilo=range(d)
+  return(c( length(d), hilo[2]-hilo[1], mean(d), sd(d), fivenum(d, na.rm=TRUE) ))
+}
+print(vapply(thedat, meansdetc,
+         c( Count=0, Range=0, Mean=0, Sdev=0, Min.=0, "1st Qu."=0, Median=0, "3rd Qu."=0, Max.=0)))
