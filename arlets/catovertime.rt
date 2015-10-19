@@ -51,7 +51,8 @@ title("Internet Cat Photo Postings over Time");
 #axis(4, round(c(min(x$blah), quantile(x$blah, probs=0.25), quantile(x$blah, probs=0.50), quantile(x$blah, probs=0.75), max(x$blah))))
 
 # or for custom tick marks try something like (probably needs yaxt='n' up
-# in the plot()
+# in the plot() - but Hmisc fails to install on OpenBSD, so disabled
+# here by default.
 #library(Hmisc)
 #minor.tick(nx=0,ny=2)
 
