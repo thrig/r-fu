@@ -1,7 +1,8 @@
-r-fu arlets directory. These are templates that get filled in with options or
-arguments to r-fu (plus perhaps configuration from the optional *.conf file),
-then fed to R. See r-fu for details of how R is run, then study the existing
-templates and check the output of `r-fu --show-code ...` to audit that the
-template is being filled in properly.
+r-fu arlets directory. These are templates that get filled in with options
+or arguments to r-fu (plus perhaps configuration from an optional *.ini
+file, along with any defaults from defaults.ini), then fed to R. See r-fu
+for details of how R is run, then study the existing templates and check the
+output of `r-fu --show-code ...` to audit that the template is being filled
+in properly.
 
-The template format is detailed in Text::Xslate::Syntax::Kolon
+The template format is that of Template::Simple.

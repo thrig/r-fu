@@ -1,26 +1,29 @@
 #!/usr/bin/env perl
 #
-# R wrapper script that applies named "arlets" (templated R code plus optional
-# configuration files with defaults) against hopefully appropriate input data
-# and write the hopefully appropriate output data required from running said
-# templated R code through R itself. Basically some glue to help make R work
-# better from the unix command line (or Makefile, etc.) environment.
+# R wrapper script that applies named "arlets" (templated R code plus
+# optional configuration files with defaults) against hopefully appropriate
+# input data and write the hopefully appropriate output data required from
+# running said templated R code through R itself. Basically some glue to
+# help make R work better from the unix command line (or Makefile, etc.)
+# environment.
 #
 # Run perldoc(1) on this file for additional documentation.
 #
-# This program is free software; you can redistribute it and/or modify it under
-# the same terms as Perl itself.
+# This program is free software; you can redistribute it and/or modify it
+# under the same terms as Perl itself.
 
 use strict;
 use warnings;
 
+use Config::Tiny ();
 use File::Basename qw(basename);
 use File::HomeDir ();
-use File::Spec    ();
-use File::Temp    ();
+use File::Slurper qw(read_text);
+use File::Spec ();
+use File::Temp ();
 use Getopt::Long qw(GetOptions);
 use IPC::Run3 qw(run3);
-use Text::Xslate ();
+use Template::Simple ();
 
 my $Arlet_Dir = $ENV{ARLET_DIR}
   || File::Spec->catfile( File::HomeDir->my_home, "share/arlets" );
@@ -31,59 +34,48 @@ my $Prog_Name = basename($0);
 my $Tmp_Fh;
 
 GetOptions(
-  'help|h|?'  => \&emit_help,
-  'width=f'   => \my $Flag_Width,
-  'height=f'  => \my $Flag_Height,
-  'show-code' => \my $Flag_Show_Code,
+  'help|h|?'   => \&emit_help,
+  'width=f'    => \my $Flag_Width,
+  'height=f'   => \my $Flag_Height,
+  'show-code'  => \my $Flag_Show_Code,
 ) or do { warn "$Prog_Name: error parsing options\n"; emit_help() };
 
-my $arlet = shift or emit_help();
-my $arlet_file = "$arlet.rt";
-
-# Global defaults, clobbered by anything in the (optional!) *.conf file,
-# clobbered by anything read somehow as an option.
-my %template = ( width => 7, height => 7 );
-
-my $hide_stdout = 0;
-my $read_stdin  = 1;
+my $arlet = shift // emit_help();
+$arlet = File::Spec->catfile( $Arlet_Dir, $arlet );
 
 ##############################################################################
 #
 # MAIN
 
-# Should use Config:: something but didn't have any installed on my laptop at
-# time of writing nor Internet access, so going with (the predictably buggy)
-# "simple INI style in a hurry" method.
-{
-  my $config;
-  if ( open $config, '<', File::Spec->catfile( $Arlet_Dir, "$arlet.conf" ) ) {
-    while ( my $line = readline $config ) {
-      if ( $line =~ m/^([^=]+)=(.*)/ ) {
-        $template{$1} = $2;
-      }
-    }
-    if ( exists $template{no_stdout} ) {
-      $hide_stdout = $template{no_stdout};
-    }
-    if ( exists $template{no_stdin} ) {
-      $read_stdin = $template{no_stdin};
-    }
+my $Config = load_config($arlet);
+
+# hmm, but also want auto-filename added if unset and *.ini notes that
+# there should be a device file... inject trailing filename in such a
+# case, but that would then require mandatory pre-arguments. Hrm!
+
+# Try to be smart about the output format. Remove this if proves
+# problematic, replace with `-o pdf` or something?
+if ( @ARGV and $ARGV[-1] =~ m/\.([^.]+)$/ ) {
+  my $device = $1;
+  if (exists $Config->{device}->{ $device . "_width" }) {
+    $Config->{device}->{device} = $device;
   }
 }
 
 if ( defined $Flag_Width ) {
-  $template{width} = $Flag_Width;
+  $Config->{device}->{ $Config->{device}->{device} . '_width' } = $Flag_Width;
 }
 if ( defined $Flag_Height ) {
-  $template{height} = $Flag_Height;
+  $Config->{device}->{ $Config->{device}->{device} . '_height' } =
+    $Flag_Height;
 }
 
-# For `... | r-fu ...` support; stdin used to feed R code to R, so must create
-# temporary file, and try to find a conventional "-" to replace with the
-# temporary filename for the R code to then presumably read. (Another option
-# might be to template the data from stdin into the R code directly, but that's
+# For `... | r-fu ...` support; stdin is used to feed R code to R, so
+# must instead create a temporary file, and inject that filename onto
+# the arguments to R as hopefully appropriate. (Another option might be
+# to template the data from stdin into the R code directly, but that's
 # more work.)
-if ($read_stdin) {
+if ( $Config->{_}->{read_stdin} ) {
   if ( !@ARGV ) {
     push @ARGV, stdin2tmpfile();
   } else {
@@ -96,15 +88,23 @@ if ($read_stdin) {
   }
 }
 
-# Anything remaining past the arlet name passed to template
-$template{args} = \@ARGV;
+my %template;
 $template{argcount} = @ARGV;
+for my $ai ( 0 .. $#ARGV ) {
+  $template{"arg$ai"} = $ARGV[$ai];
+}
 
-my $tx = Text::Xslate->new( path => [$Arlet_Dir] );
-my $rcode = $tx->render( $arlet_file, \%template );
+$template{device} = $Config->{device}->{device};
+$template{device_width} =
+  $Config->{device}->{ $Config->{device}->{device} . '_width' };
+$template{device_height} =
+  $Config->{device}->{ $Config->{device}->{device} . '_height' };
+
+my $tmpl = Template::Simple->new();
+my $rcode = $tmpl->render( read_text($arlet), \%template );
 
 if ($Flag_Show_Code) {
-  print $rcode;
+  print $$rcode;
   exit;
 }
 
@@ -117,7 +117,7 @@ push @R_Command, @ARGV;
 # awry, so pass whatever that is along. But do need to show anything from R if
 # things go awry for ease of debugging; otherwise remain silent (no news is
 # good news).
-eval { run3 \@R_Command, \$rcode, \$stdout, \$stderr; };
+eval { run3 \@R_Command, $rcode, \$stdout, \$stderr; };
 if ($@) {
   warn "$Prog_Name: R command: @R_Command\n";
   warn "$Prog_Name: run3() failed: $@\n";
@@ -126,9 +126,9 @@ if ($@) {
 if ( $? >> 8 != 0 ) {
   warn "$Prog_Name: R command: @R_Command\n";
   warn $stderr;
-  $hide_stdout = 0;
+  $Config->{_}->{hide_stdout} = 0;
 }
-print $stdout unless $hide_stdout;
+print $stdout unless $Config->{_}->{hide_stdout};
 exit $?;
 
 ##############################################################################
@@ -137,8 +137,31 @@ exit $?;
 
 sub emit_help {
   warn
-    "Usage: $Prog_Name [--width=f] [--height=f] [--show-code] arlet [arletargs ..]";
+    "Usage: $Prog_Name [-o=png|pdf] [--width=f] [--height=f] [--show-code] arlet [arletargs ..]\n";
   exit 64;
+}
+
+sub load_config {
+  my ($arlet) = @_;
+
+  my $global_conf =
+    Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, 'defaults.ini' ),
+    'utf8' );
+
+  my $arlet_conf =
+    Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, "$arlet.ini" ),
+    'utf8' );
+  for my $key ( keys %$arlet_conf ) {
+    if ( !exists $global_conf->{$key} ) {
+      $global_conf->{$key} = $arlet_conf->{$key};
+    } else {
+      for my $subkey ( keys %{ $arlet_conf->{$key} } ) {
+        $global_conf->{$key}->{$subkey} = $arlet_conf->{$key}->{$subkey};
+      }
+    }
+  }
+
+  return $global_conf;
 }
 
 sub stdin2tmpfile {
@@ -166,7 +189,6 @@ r-fu - template and feed named code templates to R
   16000 0.4815
   32000 1.8844
   $ r-fu timecomplex times out.pdf
-  $ open out.pdf
 
 Or, reading from standard input (and temporary files):
 
@@ -177,7 +199,7 @@ Or, to see the code that would be passed to R:
   $ r-fu --show-code timecomplex times out.pdf
   ...
 
-Or, to then fuss around with this data in R:
+Or then to fuss around with this data in R:
 
   $ r-fu --show-code timecomplex times out.pdf > rc
   $ R
@@ -186,32 +208,37 @@ Or, to then fuss around with this data in R:
 
 =head1 DESCRIPTION
 
-C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code plus
-optional configuration files with defaults) through R. Basically some glue to
-help make R work better from the unix command line (or Makefile, etc.)
-environment.
+C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code
+plus optional configuration files with defaults) through R. Basically some
+glue to better integrate R into the unix command line environment.
 
 =head1 USAGE
 
-  $ r-fu [options] arlet [arletargs ..]
+  $ r-fu [options] arletname [arletargs ..]
 
-This program supports the following command line switches:
+This program supports the following command line options:
 
 =over 4
 
+=item B<--output>=I<pdf|png>
+
+Specify the format of the resulting graphic (if any).
+
 =item B<--width>=I<float>
 
-Width of the resulting graph (if any).
+Width of the resulting graphic (if any). Should probably be in units
+sensible to the output format (PDF by default, though this may differ on a
+per-arlet basis).
 
 =item B<--height>=I<float>
 
-Width of the resulting graph (if any).
+Width of the resulting graphic (if any).
 
 =item B<--show-code>
 
-Does not run R; instead shows the templated R code that would be passed to R on
-standard out. This code, as shown above, could then be read into an R REPL via
-C<source>, for example.
+Does not run R; instead shows the templated R code that would be passed to R
+on standard out. This code, as shown in the L</"SYNOPSIS">, above, could
+then be read into R, for example.
 
 =back
 
@@ -222,29 +249,13 @@ template defaults (e.g. for width and height). These must be located in a
 directory that C<r-fu> is configured to look in, set by the C<ARLET_DIR>
 environment variable or C<~/share/arlets> otherwise.
 
-L<Text::Xslate> is used to template the arlets; see
-L<Text::Xslate::Syntax::Kolon> for the template format. The C<arlets> directory
-might be good to study as well.
+L<Template::Simple> is used to template the arlets.
 
 =head2 Config File
 
-Arlets may have an optional C<*.conf> file; this is parsed only for
-C<key=value> lines that are added to the template parameters; one exception is
-the C<no_stdout> line, which can be set to a "true" value for Perl to hide
-standard out from R, which otherwise is shown by default (or under error
-conditions):
-
-  no_stdout=1
-
-This is suitable to set for arlets that only produce some graphics file.
-Another option determines whether standard input to C<r-fu> is used:
-
-  no_stdin=1
-
-would turn off the default handling of standard input, which is to copy that
-data to a temporary file, and if the argument list is empty, append that
-filename to the command arguments; or, if the argument list is not empty, the
-first C<-> in that list will be replaced with the temporary filename.
+Arlets may have an optional C<arletname.ini> file, in addition to the global
+C<defaults.ini> from which various parameters may be set, in particular the
+default output format, how to handle I/O handles, and so forth.
 
 =head1 BUGS
 
@@ -259,30 +270,19 @@ Patches that fix problems or add new features are welcome.
 
 =head2 Known Issues
 
-Buggy arlet code will doubtless cause R to blow up in strange ways. Doubtless
-other things besides.
+Buggy arlet code will doubtless cause R to blow up in strange ways.
 
-The graphics device prints some random messages, would be nice to find a way to
-turn those off, so arlet code could generate both a graph and make unpolluted
-output to standard out.
+The graphics device prints some random messages, would be nice to find a way
+to turn those off, so arlet code could generate both a graph and make
+unpolluted output to standard out.
 
 =head1 SEE ALSO
 
 L<http://www.r-project.org/>
 
-Template system for the arlets:
+Another option for doing R from Perl is L<Statistics::NiceR>.
 
-L<Text::Xslate>, using the <Text::Xslate::Syntax::Kolon> format.
-
-Another option for doing R from Perl:
-
-L<Statistics::NiceR>
-
-And other R projects in the same vein:
-
-L<http://yihui.name/knitr/>
-
-L<http://www.rstudio.com/>
+Other R projects in the same vein include L<http://yihui.name/knitr/> and L<http://www.rstudio.com/>.
 
 =head1 AUTHOR
 
