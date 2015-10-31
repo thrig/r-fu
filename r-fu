@@ -23,7 +23,11 @@ use File::Spec ();
 use File::Temp ();
 use Getopt::Long qw(GetOptions);
 use IPC::Run3 qw(run3);
-use Template::Simple ();
+# Backwards incompatibility: Xslate proved too HTMLish (always escaping
+# things; this is troublesome for not-HTML needs) and Template::Simple
+# too, well, simple, as the templates do need some logic (or I need to
+# learn a *lot* more about R).
+use Text::Template ();
 
 my $Arlet_Dir = $ENV{ARLET_DIR}
   || File::Spec->catfile( File::HomeDir->my_home, "share/arlets" );
@@ -34,14 +38,17 @@ my $Prog_Name = basename($0);
 my $Tmp_Fh;
 
 GetOptions(
-  'help|h|?'   => \&emit_help,
-  'width=f'    => \my $Flag_Width,
-  'height=f'   => \my $Flag_Height,
-  'show-code'  => \my $Flag_Show_Code,
+  'help|h|?'    => \&emit_help,
+  'width=f'     => \my $Flag_Width,
+  'height=f'    => \my $Flag_Height,
+  'show-code'   => \my $Flag_Show_Code,
+  'show-stdout' => \my $Flag_Show_Stdout,
 ) or do { warn "$Prog_Name: error parsing options\n"; emit_help() };
 
 my $arlet = shift // emit_help();
-$arlet = File::Spec->catfile( $Arlet_Dir, $arlet );
+my $arlet_file = File::Spec->catfile( $Arlet_Dir, $arlet );
+
+die "$Prog_Name: cannot read arlet file '$arlet_file'\n" if !-r $arlet_file;
 
 ##############################################################################
 #
@@ -49,16 +56,19 @@ $arlet = File::Spec->catfile( $Arlet_Dir, $arlet );
 
 my $Config = load_config($arlet);
 
-# hmm, but also want auto-filename added if unset and *.ini notes that
-# there should be a device file... inject trailing filename in such a
-# case, but that would then require mandatory pre-arguments. Hrm!
-
-# Try to be smart about the output format. Remove this if proves
-# problematic, replace with `-o pdf` or something?
-if ( @ARGV and $ARGV[-1] =~ m/\.([^.]+)$/ ) {
-  my $device = $1;
-  if (exists $Config->{device}->{ $device . "_width" }) {
-    $Config->{device}->{device} = $device;
+# Try to guess the output format. Remove this if proves problematic,
+# perhaps something like `-o pdf` or `-o foo.png` ?
+if (@ARGV) {
+  for my $arg ( reverse @ARGV ) {
+    if ( $arg =~ m/\.([^.]+)$/ ) {
+      my $dev = $1;
+      # KLUGE test to see if extant format; otherwise would need a list
+      # of known formats...
+      if ( exists $Config->{device}->{ $dev . "_width" } ) {
+        $Config->{device}->{device} = $dev;
+      }
+      last;
+    }
   }
 }
 
@@ -68,6 +78,10 @@ if ( defined $Flag_Width ) {
 if ( defined $Flag_Height ) {
   $Config->{device}->{ $Config->{device}->{device} . '_height' } =
     $Flag_Height;
+}
+
+if ( defined $Flag_Show_Stdout ) {
+  $Config->{_}->{hide_stdout} = 0;
 }
 
 # For `... | r-fu ...` support; stdin is used to feed R code to R, so
@@ -88,23 +102,22 @@ if ( $Config->{_}->{read_stdin} ) {
   }
 }
 
-my %template;
-$template{argcount} = @ARGV;
-for my $ai ( 0 .. $#ARGV ) {
-  $template{"arg$ai"} = $ARGV[$ai];
-}
+my $dev      = $Config->{device}->{device};
+my %template = (
+  args       => \@ARGV,
+  arlet      => $arlet,
+  arlet_file => $arlet_file,
+  device     => $dev,
+  width      => $Config->{device}->{ $dev . '_width' },
+  height     => $Config->{device}->{ $dev . '_height' },
+  Prog_Name  => $Prog_Name,
+);
 
-$template{device} = $Config->{device}->{device};
-$template{device_width} =
-  $Config->{device}->{ $Config->{device}->{device} . '_width' };
-$template{device_height} =
-  $Config->{device}->{ $Config->{device}->{device} . '_height' };
-
-my $tmpl = Template::Simple->new();
-my $rcode = $tmpl->render( read_text($arlet), \%template );
+my $tmpl = Text::Template->new( TYPE => 'FILE', SOURCE => $arlet_file );
+my $rcode = $tmpl->fill_in( HASH => \%template );
 
 if ($Flag_Show_Code) {
-  print $$rcode;
+  print $rcode;
   exit;
 }
 
@@ -117,7 +130,7 @@ push @R_Command, @ARGV;
 # awry, so pass whatever that is along. But do need to show anything from R if
 # things go awry for ease of debugging; otherwise remain silent (no news is
 # good news).
-eval { run3 \@R_Command, $rcode, \$stdout, \$stderr; };
+eval { run3 \@R_Command, \$rcode, \$stdout, \$stderr; };
 if ($@) {
   warn "$Prog_Name: R command: @R_Command\n";
   warn "$Prog_Name: run3() failed: $@\n";
@@ -137,7 +150,8 @@ exit $?;
 
 sub emit_help {
   warn
-    "Usage: $Prog_Name [-o=png|pdf] [--width=f] [--height=f] [--show-code] arlet [arletargs ..]\n";
+    "Usage: $Prog_Name [-o=png|pdf] [--width=f] [--height=f] \n",
+    "    [--show-code] [--show-stdout] arlet [arletargs ..]\n";
   exit 64;
 }
 
@@ -149,8 +163,7 @@ sub load_config {
     'utf8' );
 
   my $arlet_conf =
-    Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, "$arlet.ini" ),
-    'utf8' );
+    Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, "$arlet.ini" ), 'utf8' );
   for my $key ( keys %$arlet_conf ) {
     if ( !exists $global_conf->{$key} ) {
       $global_conf->{$key} = $arlet_conf->{$key};
@@ -240,6 +253,13 @@ Does not run R; instead shows the templated R code that would be passed to R
 on standard out. This code, as shown in the L</"SYNOPSIS">, above, could
 then be read into R, for example.
 
+=item B<--show-stdout>
+
+Shows the standard output from R. This may be disabled by default in
+either the C<defaults.ini> or arlet-specific C<*.ini> configuration.
+Enabling it may or may not produce useful information to standard out,
+depending on what the arlet does.
+
 =back
 
 =head1 ARLETS
@@ -249,7 +269,7 @@ template defaults (e.g. for width and height). These must be located in a
 directory that C<r-fu> is configured to look in, set by the C<ARLET_DIR>
 environment variable or C<~/share/arlets> otherwise.
 
-L<Template::Simple> is used to template the arlets.
+L<Text::Template> is used to template the arlets.
 
 =head2 Config File
 

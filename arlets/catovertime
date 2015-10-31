@@ -1,0 +1,58 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# Example graph that can be adapted to parse arbitrary time stamps
+# (adjust the as.Date format="" bit) and shows how to shade certain
+# regions.
+#
+#   r-fu catovertime cats.csv out.pdf
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
+
+x=read.csv("{$args[0]}")
+
+names(x)=c('year','catphotos');
+x$year = as.Date(x$year, format="%Y-%m-%d");
+
+plot(x,type='n',log='y',xaxt='n',ylab='Postings (log)',xlab='Shaded areas are U.S. recessions.',fg="grey")
+
+# How to shade areas, e.g. here U.S. recessions
+#
+# For not-log graphing, remove the 10 ^ bit on the dimensions. NOTE that
+# "usr" returns x1,x2,y1,y2 while rect() expects xleft,ybot,xright,ytop.
+rect(
+  as.Date("1990-07-01", "%Y-%m-%d"),
+  10 ^ par("usr")[3],
+  as.Date("1991-03-01", "%Y-%m-%d"),
+  10 ^ par("usr")[4],
+  border=NA, col=rgb(0.75,0.75,0.75,1/4)
+);
+rect(
+  as.Date("2001-03-01", "%Y-%m-%d"),
+  10 ^ par("usr")[3],
+  as.Date("2001-11-01", "%Y-%m-%d"),
+  10 ^ par("usr")[4],
+  border=NA, col=rgb(0.75,0.75,0.75,1/4)
+);
+rect(
+  as.Date("2007-12-01", "%Y-%m-%d"),
+  10 ^ par("usr")[3],
+  as.Date("2009-06-01", "%Y-%m-%d"),
+  10 ^ par("usr")[4],
+  border=NA, col=rgb(0.75,0.75,0.75,1/4)
+);
+points(x,lwd=2,bty='n',type='l',tcl=-0.25);
+axis.Date(1, x$year, at=unique(format(x$year, "%Y-01-01")) );
+
+title("Internet Cat Photo Postings over Time");
+
+# if the data stays within a particular range, limits might be handy to show
+# along the axis
+#axis(4, round(c(min(x$blah), quantile(x$blah, probs=0.25), quantile(x$blah, probs=0.50), quantile(x$blah, probs=0.75), max(x$blah))))
+
+# or for custom tick marks try something like (probably needs yaxt='n' up
+# in the plot() - but Hmisc fails to install on OpenBSD, so disabled
+# here by default.
+#library(Hmisc)
+#minor.tick(nx=0,ny=2)
+
+dev.off()

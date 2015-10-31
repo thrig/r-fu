@@ -1,0 +1,58 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# Graphs time complexity numbers in both normal and log-log form plus reference
+# graphs for linear, square, cubic, and quadratic fits. Sample input data for
+# the first file should contain something like:
+#
+#   1000 0.0024
+#   2000 0.0077
+#   4000 0.0306
+#   8000 0.1258
+#   16000 0.4815
+#   32000 1.8844
+#
+# where x was the number of thingies done and y the time it took to perform the
+# calculation on them. Output is to the second file on the command line:
+#
+#   r-fu timecomplex footimes out.pdf
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
+
+thedat=read.table("{$args[0]}")
+names(thedat)=c("x","y")
+
+# Some fittings, as I could see someone in a hurry mistaking x^2 for x^3
+linear = thedat
+names(linear)=c("x","y")
+linear$y = mean( thedat$y / thedat$x ) * linear$x
+
+sqs = thedat
+names(sqs)=c("x","y")
+sqs$y = mean( thedat$y / (thedat$x ** 2) ) * sqs$x ** 2
+
+cubes = thedat
+names(cubes)=c("x","y")
+cubes$y = mean( thedat$y / (thedat$x ** 3) ) * cubes$x ** 3
+
+quads = thedat
+names(quads)=c("x","y")
+quads$y = mean( thedat$y / (thedat$x ** 4) ) * quads$x ** 4
+
+par(mfcol=c(1,2))
+
+plot(thedat$x,thedat$y,type='n',bty='n',ylab='Time',xlab='Operations',tcl=-0.25)
+
+lines(linear,col='#333333',lwd=1)
+lines(sqs,lty=2,col='#333333',lwd=1)
+lines(cubes,lty=3,col='#333333',lwd=1)
+lines(quads,lty=4,col='#333333',lwd=1)
+lines(thedat,type='b',pch=20,lwd=2)
+
+plot(thedat$x,thedat$y,type='n',log="xy",bty='n',ylab='log',xlab='log',tcl=-0.25)
+lines(linear,col='#333333',lwd=1)
+lines(sqs,lty=2,col='#333333',lwd=1)
+lines(cubes,lty=3,col='#333333',lwd=1)
+lines(quads,lty=4,col='#333333',lwd=1)
+lines(thedat,type='b',pch=20,lwd=2)
+
+dev.off()

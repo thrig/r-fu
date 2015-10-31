@@ -1,0 +1,24 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# Chi-squared test for equal distribution of the input among the distinct
+# possible values in the input (e.g. that a six-sided die is fair).
+#
+#   r-fu equichisq datfile
+#   ... | r-fu equichisq
+#
+# The result is printed to standard output. A p-value of 1 means the input
+# values are perfectly equally distributed:
+#
+#   perl -E 'say for 1..6' | r-fu equichisq
+#
+# while any lower value points to some amount of skew from that ideal.
+#
+# NOTE that this calculation may give misleading results if the input is
+# sparse, e.g. a six-sided die that for some reason never rolls six but
+# is otherwise normal.
+
+thedat=read.table("{$args[0]}")
+tab=table(thedat)
+
+sprintf("elements %d unique %d", length(thedat$V1), length(tab))
+chisq.test(tab, p=rep(1/length(tab), length(tab)))

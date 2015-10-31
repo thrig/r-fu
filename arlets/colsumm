@@ -1,0 +1,37 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# Like summary.rt, only loops over all the columns and prints basic
+# statistical information about each column. Handy with a list of
+# numbers from say "IO Summary" lines from multiple runs of `filebench`:
+#
+#   2298: 334.492: IO Summary: 202885 ops, 673.462 ops/s, (217/22 r/w),   3.4mb/s,    264us cpu/op, 337.0ms latency
+#   2407: 327.000: IO Summary: 270420 ops, 896.212 ops/s, (289/29 r/w),   4.5mb/s,    280us cpu/op, 230.2ms latency
+#   2517: 341.992: IO Summary: 205475 ops, 683.902 ops/s, (221/22 r/w),   3.4mb/s,    276us cpu/op, 292.6ms latency
+#   ...
+#
+# And the mean, sdev, etc. of the ops/s, cpu/op, latency, or whatever
+# columns is desired. This will mean awk or perl or something must be
+# used to present just a list of numbers to this script, so for the
+# above, perhaps something like
+#
+#  awk '{print $7, $12, $14}' datfile | tr -d a-z | r-fu colsumm - ops/s cpu/op latency
+#
+# TODO transposing the output rows and columns may be necessary if there
+# is a very large number of columns, and not-wide output is desired.
+
+thedat=read.table("{$args[0]}", blank.lines.skip=TRUE)
+
+# optional named columns for output
+{
+  if (@args > 1) {
+    shift @args;
+    "names(thedat)=c(" . join(",", map { qq{"$_"} } @args) . ")"
+  }
+}
+
+meansdetc = function(d) \{
+  hilo=range(d)
+  return(c( length(d), hilo[2]-hilo[1], mean(d), sd(d), fivenum(d, na.rm=TRUE) ))
+\}
+print(vapply(thedat, meansdetc,
+         c( Count=0, Range=0, Mean=0, Sdev=0, Min.=0, "1st Qu."=0, Median=0, "3rd Qu."=0, Max.=0)))

@@ -1,0 +1,16 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# boxplot data. Usage:
+#
+#   r-fu boxplot datfile out.pdf
+#   ... | r-fu boxplot - out.pdf
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
+
+thedat=read.table("{$args[0]}")
+
+thebp=boxplot(thedat,horizontal=TRUE,frame.plot=FALSE,boxlwd=2,staplelwd=2,whisklwd=2,medlwd=5);
+
+thebp
+
+dev.off()

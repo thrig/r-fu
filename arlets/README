@@ -5,4 +5,6 @@ for details of how R is run, then study the existing templates and check the
 output of `r-fu --show-code ...` to audit that the template is being filled
 in properly.
 
-The template format is that of Template::Simple.
+The template format is that of Text::Template.
+
+https://metacpan.org/module/Text::Template
