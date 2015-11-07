@@ -180,6 +180,7 @@ sub load_config {
 sub stdin2tmpfile {
   $Tmp_Fh =
     File::Temp->new( TMPDIR => 1, TEMPLATE => "$Prog_Name.stdin.XXXXXXXXXX" );
+  $Tmp_Fh->unlink_on_destroy(0) if $Flag_Show_Code;
   $Tmp_Fh->print($_) while readline STDIN;
   $Tmp_Fh->flush;
   $Tmp_Fh->sync;

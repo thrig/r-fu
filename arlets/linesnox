@@ -1,0 +1,33 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# Input columns (CSV) assumed to be lines to be plotted in parallel, with
+# no X data supplied.
+#
+#   % head -2 foo.csv 
+#   22.00,21.37
+#   21.16,20.85
+#   % r-fu linesnox foo.csv out.pdf
+#   % ... | r-fu linesnox - out.pdf
+#
+# Practical uses might be for data readings from N sensors (e.g.
+# temperature probes) over some period of (unmarked) time.
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
+
+theys=read.csv("{$args[0]}",header=FALSE)
+aut=1:length(theys$V1)
+
+plot(NULL,type='l',xlab='Arbitrary Unit of Time',ylab='',tcl=-0.25,bty='n',xlim=range(aut),ylim=c(min(theys),max(theys)))
+
+ctable=rainbow(length(theys))
+cidx=1
+
+scribble = function(y) \{
+  lines(aut,y,type='l',col=ctable[cidx],lwd=2,pch=20)
+  assign("cidx", cidx+1, envir=globalenv())
+\}
+
+# operate on columns (2)
+apply(theys, 2, scribble)
+
+dev.off()
