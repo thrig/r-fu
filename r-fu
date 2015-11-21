@@ -291,7 +291,8 @@ Patches that fix problems or add new features are welcome.
 
 =head2 Known Issues
 
-Buggy arlet code will doubtless cause R to blow up in strange ways.
+Buggy arlet code will doubtless cause R (or possibly C<r-fu>) to blow up
+in strange ways.
 
 The graphics device prints some random messages, would be nice to find a way
 to turn those off, so arlet code could generate both a graph and make
@@ -303,7 +304,9 @@ L<http://www.r-project.org/>
 
 Another option for doing R from Perl is L<Statistics::NiceR>.
 
-Other R projects in the same vein include L<http://yihui.name/knitr/> and L<http://www.rstudio.com/>.
+Other R projects in a similar vein only different or more formal include
+L<http://yihui.name/knitr/> and L<http://www.rstudio.com/> and
+L<http://projecttemplate.net>.
 
 =head1 AUTHOR
 

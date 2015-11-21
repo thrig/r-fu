@@ -1,11 +1,11 @@
 #compdef r-fu
 #
-# ZSH completion script for r-fu. See https://github.com/thrig/zsh-compdef for
-# more information on how to set this up in ZSH. This code, r-fu, and where the
-# contents of the arlet directory get installed to probably should all agree.
+# ZSH completion script for r-fu. This code, r-fu, and where the
+# contents of the arlet directory get installed to probably should
+# all agree.
 #
-# This program is free software; you can redistribute it and/or modify it under
-# the same terms as Perl itself.
+# This program is free software; you can redistribute it and/or modify
+# it under the same terms as Perl itself.
 
 local adir
 adir=${ARLET_DIR:-~/share/arlets}

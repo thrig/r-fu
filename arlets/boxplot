@@ -4,6 +4,18 @@
 #
 #   r-fu boxplot datfile out.pdf
 #   ... | r-fu boxplot - out.pdf
+#
+# This will work(TM) by default with multiple columns; for example CSV
+# temperature data that might be passed to the 'linesnox' arlet could
+# be viewed as boxplots via:
+#
+#   % head -2 foo.csv 
+#   22.00,21.37
+#   21.16,20.85
+#   % tr , ' ' < foo.csv | r-fu boxplot - out.pdf
+#
+# Which will show where temperatures spent most of their time, plus the
+# various extremes.
 
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
