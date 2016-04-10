@@ -1,0 +1,24 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# Usage:
+#
+#   r-fu histogram datfile out.pdf
+#   ... | r-fu histogram - out.pdf
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
+
+between = function(x,min,max) \{
+  if (x > max) {
+    return(max)
+  } else if (x < min) {
+    return(min)
+  } else {
+    return(x)
+  }
+\}
+
+thedat=read.table("{$args[0]}")
+
+hist(thedat$V1,plot=TRUE,main="",xlab="Range",breaks=between(trunc(sqrt(length(thedat$V1))),1,100));
+
+dev.off()
