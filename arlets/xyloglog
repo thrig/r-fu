@@ -14,6 +14,6 @@
 xy=read.table("{$args[0]}")
 
 plot(xy,type='b',lwd=2,pch=20,xlab='X (log)',ylab='Y (log)',log="xy",tcl=-0.25,bty='n')
-lines(lowess(xy),col='red',lty=2)
+lines(lowess(xy),col='purple',lty=2,lwd=2)
 
 dev.off()
