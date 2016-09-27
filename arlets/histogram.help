@@ -1,0 +1,7 @@
+Produces a histogram of all the numbers given. Usage:
+
+  r-fu histogram datfile out.pdf
+  ... | r-fu histogram - out.pdf
+
+consider also the barplot arlet, which produces a similar graph by
+different means (and also includes mean, quantile indicators)

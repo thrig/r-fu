@@ -1,0 +1,11 @@
+Input columns (in CSV) are assumed to be lines to be plotted in parallel,
+with no X data supplied.
+
+  % head -2 foo.csv 
+  22.00,21.37
+  21.16,20.85
+  % r-fu linesnox foo.csv out.pdf
+  % ... | r-fu linesnox - out.pdf
+
+Practical uses might be for data readings from N sensors (e.g.
+temperature probes) over some period of (unmarked) time.

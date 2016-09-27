@@ -1,25 +1,8 @@
 # r-fu arlet template - install to ARLET_DIR directory
-#
-# boxplot data. Usage:
-#
-#   r-fu boxplot datfile out.pdf
-#   ... | r-fu boxplot - out.pdf
-#
-# This will work(TM) by default with multiple columns; for example CSV
-# temperature data that might be passed to the 'linesnox' arlet could
-# be viewed as boxplots via:
-#
-#   % head -2 foo.csv 
-#   22.00,21.37
-#   21.16,20.85
-#   % tr , ' ' < foo.csv | r-fu boxplot - out.pdf
-#
-# Which will show where temperatures spent most of their time, plus the
-# various extremes.
-
-{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
 thedat=read.table("{$args[0]}")
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
 thebp=boxplot(thedat,horizontal=TRUE,frame.plot=FALSE,boxlwd=2,staplelwd=2,whisklwd=2,medlwd=5);
 

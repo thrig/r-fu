@@ -1,0 +1,24 @@
+# r-fu arlet template - install to ARLET_DIR directory
+
+{
+  my %methods = (
+    kendall  => 'method="kendal",alternative="two.sided"',
+    pearson  => 'method="pearson",alternative="two.sided",conf.level=0.95',
+    spearman => 'method="spearman",alternative="two.sided"',
+  );
+
+  if (!exists $methods{$args[0]}) {
+    die "no such method: $args[0]\n";
+  }
+}
+x=scan("{$args[1]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
+y=scan("{$args[2]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
+
+if(length(x) != length(y)) \{
+  cat("\n *** warning: input files differ in length, going procrustean ***\n")
+  atmost=min(length(x),length(y))
+  length(x)=atmost
+  length(y)=atmost
+\}
+
+cor.test(x,y,{$methods{$args[0]}});

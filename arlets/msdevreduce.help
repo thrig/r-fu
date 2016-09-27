@@ -1,0 +1,13 @@
+Mean and standard deviation reduction of by default only the first
+column of data in each of the input file(s). The files are not
+concatenated.
+
+  r-fu msdevreduce file1 [file2 ..]
+  ... | r-fu msdevreduce -
+
+An alternate column to operate on may be selected via:
+
+  r-fu --col=2 msdevreduce ...
+
+The summary arlet will give mean and sd for all the input data.
+

@@ -1,0 +1,7 @@
+Example graph that can be adapted to parse arbitrary time stamps
+(adjust the as.Date format="" bit) and shows how to shade certain
+regions.
+
+  r-fu catovertime cats.csv out.pdf
+
+Probably should not be installed for production usage.

@@ -1,0 +1,20 @@
+Performs various correlation tests via cor.test.
+
+The files should contain the same number of elements though will be
+truncated if one is longer (not using pairwise samples may defeat
+the point of the correlation). Consult a statistical text as to the
+requirements of the input data for the various methods.
+Correlations include:
+
+  r-fu correlation kendall filea fileb
+
+Kendall's tau correlation coefficient test, two sided.
+
+  r-fu correlation pearson filea fileb
+
+Pearson's product moment correlation coefficient t-test, p-value 0.05,
+two sided.
+
+  r-fu correlation spearman filea fileb
+
+Spearman rank correlation test, two sided.

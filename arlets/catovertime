@@ -1,10 +1,4 @@
-# r-fu arlet template - install to ARLET_DIR directory
-#
-# Example graph that can be adapted to parse arbitrary time stamps
-# (adjust the as.Date format="" bit) and shows how to shade certain
-# regions.
-#
-#   r-fu catovertime cats.csv out.pdf
+# r-fu arlet EXAMPLE template
 
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 

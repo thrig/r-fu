@@ -1,0 +1,8 @@
+xy plot data with log/log axes. Usage:
+
+  r-fu xyloglog datfile out.pdf
+  ... | r-fu xyloglog - out.pdf
+
+where the 'datfile' or standard input contains two columns of X and Y
+data (R is picky about input, so leading and trailing whitespace may
+need to be trimmed, and a single space used to delimit the data).

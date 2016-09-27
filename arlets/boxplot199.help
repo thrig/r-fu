@@ -1,0 +1,13 @@
+boxplot data, minus the 1% and 99% (or custom limits as supplied) in the
+event there is or are some extreme outliers that reneder the majority of
+the data as a single point. Usage:
+
+  r-fu boxplot199 datfile out.pdf
+  ... | r-fu boxplot199 - out.pdf
+
+Custom limits would run along the lines of:
+
+  r-fu boxplot199 datfile out.pdf 0.25 0.75
+
+NOTE that throwing out data skews the results. So this probably
+should not be done without very good reasons.

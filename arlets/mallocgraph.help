@@ -1,0 +1,6 @@
+malloc.c output for 1..64 threads doing memsets 100 times, over 2**16 to
+2**37 worth of memory divided among that many threads. The resulting
+images then tiled together using Imager::Tiler.
+
+  for ms in `seq 16 37`; do ( for t in `seq 1 64`; do ./malloc -l -c 100 -m $((2**$ms)) -t $t > result.$t; echo -n "$t "; r-fu msdevreduce result.$t ; done; ) > stats.$ms; done
+  for x in `seq 16 37`; do r-fu mallocgraph stats.$x $x.png $(echo $((2**$x)) | humanize); done

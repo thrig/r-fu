@@ -38,14 +38,42 @@ my $Prog_Name = basename($0);
 my $Tmp_Fh;
 
 GetOptions(
-  'help|h|?'    => \&emit_help,
-  'width=f'     => \my $Flag_Width,
-  'height=f'    => \my $Flag_Height,
-  'show-code'   => \my $Flag_Show_Code,
-  'show-stdout' => \my $Flag_Show_Stdout,
+    'all-help'     => \my $Flag_All_Help,
+    'column|col=i' => \my @Flag_Column,
+    'help|h|?'     => \my $Flag_Help,
+    'width=f'      => \my $Flag_Width,
+    'height=f'     => \my $Flag_Height,
+    'show-code'    => \my $Flag_Show_Code,
+    'show-stdout'  => \my $Flag_Show_Stdout,
 ) or do { warn "$Prog_Name: error parsing options\n"; emit_help() };
 
+@Flag_Column = (1) if !@Flag_Column;
+
+# perhaps if when searching for something in the docs?
+if ($Flag_All_Help) {
+    opendir my $dh, $Arlet_Dir or die "$Prog_Name: could not open $Arlet_Dir: $!\n";
+    while ( my $help_file = readdir($dh) ) {
+        next if $help_file !~ m/\.help$/;
+        ( my $arlet_name = $help_file ) =~ s/\.help//;
+        print "-------------------- $arlet_name --------------------\n\n";
+        open my $help_fh, '<', File::Spec->catfile( $Arlet_Dir, $help_file )
+          or die "$Prog_Name: cannot open $help_file: $!\n";
+        print while readline $help_fh;
+        print "\n";
+    }
+    exit 64;
+}
+
 my $arlet = shift // emit_help();
+
+if ($Flag_Help) {
+    my $help_file = File::Spec->catfile( $Arlet_Dir, "$arlet.help" );
+    open my $help_fh, '<', $help_file
+      or die "$Prog_Name: cannot open $help_file: $!\n";
+    print while readline $help_fh;
+    exit 64;
+}
+
 my $arlet_file = File::Spec->catfile( $Arlet_Dir, $arlet );
 
 die "$Prog_Name: cannot read arlet file '$arlet_file'\n" if !-r $arlet_file;
@@ -59,29 +87,29 @@ my $Config = load_config($arlet);
 # Try to guess the output format. Remove this if proves problematic,
 # perhaps something like `-o pdf` or `-o foo.png` ?
 if (@ARGV) {
-  for my $arg ( reverse @ARGV ) {
-    if ( $arg =~ m/\.([^.]+)$/ ) {
-      my $dev = $1;
-      # KLUGE test to see if extant format; otherwise would need a list
-      # of known formats...
-      if ( exists $Config->{device}->{ $dev . "_width" } ) {
-        $Config->{device}->{device} = $dev;
-      }
-      last;
+    for my $arg ( reverse @ARGV ) {
+        if ( $arg =~ m/\.([^.]+)$/ ) {
+            my $dev = $1;
+            # KLUGE test to see if extant format; otherwise would need a list
+            # of known formats...
+            if ( exists $Config->{device}->{ $dev . "_width" } ) {
+                $Config->{device}->{device} = $dev;
+            }
+            last;
+        }
     }
-  }
 }
 
 if ( defined $Flag_Width ) {
-  $Config->{device}->{ $Config->{device}->{device} . '_width' } = $Flag_Width;
+    $Config->{device}->{ $Config->{device}->{device} . '_width' } = $Flag_Width;
 }
 if ( defined $Flag_Height ) {
-  $Config->{device}->{ $Config->{device}->{device} . '_height' } =
-    $Flag_Height;
+    $Config->{device}->{ $Config->{device}->{device} . '_height' } =
+      $Flag_Height;
 }
 
 if ( defined $Flag_Show_Stdout ) {
-  $Config->{_}->{hide_stdout} = 0;
+    $Config->{_}->{hide_stdout} = 0;
 }
 
 # For `... | r-fu ...` support; stdin is used to feed R code to R, so
@@ -90,35 +118,41 @@ if ( defined $Flag_Show_Stdout ) {
 # to template the data from stdin into the R code directly, but that's
 # more work.)
 if ( $Config->{_}->{read_stdin} ) {
-  if ( !@ARGV ) {
-    push @ARGV, stdin2tmpfile();
-  } else {
-    for my $arg (@ARGV) {
-      if ( $arg eq '-' ) {
-        $arg = stdin2tmpfile();
-        last;
-      }
+    if ( !@ARGV ) {
+        push @ARGV, stdin2tmpfile();
+    } else {
+        for my $arg (@ARGV) {
+            if ( $arg eq '-' ) {
+                $arg = stdin2tmpfile();
+                last;
+            }
+        }
     }
-  }
 }
 
 my $dev      = $Config->{device}->{device};
 my %template = (
-  args       => \@ARGV,
-  arlet      => $arlet,
-  arlet_file => $arlet_file,
-  device     => $dev,
-  width      => $Config->{device}->{ $dev . '_width' },
-  height     => $Config->{device}->{ $dev . '_height' },
-  Prog_Name  => $Prog_Name,
+    args       => \@ARGV,
+    arlet      => $arlet,
+    arlet_file => $arlet_file,
+    column     => \@Flag_Column,
+    device     => $dev,
+    width      => $Config->{device}->{ $dev . '_width' },
+    height     => $Config->{device}->{ $dev . '_height' },
+    Prog_Name  => $Prog_Name,
 );
 
-my $tmpl = Text::Template->new( TYPE => 'FILE', SOURCE => $arlet_file );
-my $rcode = $tmpl->fill_in( HASH => \%template );
+my $tmpl = Text::Template->new( TYPE => 'FILE', SOURCE => $arlet_file )
+  or die "$Prog_Name: could not construct template: $Text::Template::ERROR";
+my $rcode = $tmpl->fill_in(
+    BROKEN =>
+      sub { my %h = @_; die "$Prog_Name: error filling in template: " . $h{error} },
+    HASH => \%template
+) or die "$Prog_Name: could not fill in the template: $Text::Template::ERROR";
 
 if ($Flag_Show_Code) {
-  print $rcode;
-  exit;
+    print $rcode;
+    exit;
 }
 
 my ( $stdout, $stderr );
@@ -132,14 +166,14 @@ push @R_Command, @ARGV;
 # good news).
 eval { run3 \@R_Command, \$rcode, \$stdout, \$stderr; };
 if ($@) {
-  warn "$Prog_Name: R command: @R_Command\n";
-  warn "$Prog_Name: run3() failed: $@\n";
-  exit 1;
+    warn "$Prog_Name: R command: @R_Command\n";
+    warn "$Prog_Name: run3() failed: $@\n";
+    exit 1;
 }
 if ( $? >> 8 != 0 ) {
-  warn "$Prog_Name: R command: @R_Command\n";
-  warn $stderr;
-  $Config->{_}->{hide_stdout} = 0;
+    warn "$Prog_Name: R command: @R_Command\n";
+    warn $stderr;
+    $Config->{_}->{hide_stdout} = 0;
 }
 print $stdout unless $Config->{_}->{hide_stdout};
 exit $?;
@@ -149,42 +183,42 @@ exit $?;
 # SUBROUTINES
 
 sub emit_help {
-  warn
-    "Usage: $Prog_Name [-o=png|pdf] [--width=f] [--height=f] \n",
-    "    [--show-code] [--show-stdout] arlet [arletargs ..]\n";
-  exit 64;
+    warn
+      "Usage: $Prog_Name [-o=png|pdf] [--width=f] [--height=f] \n",
+      "    [--show-code] [--show-stdout] arlet [--help] [arletargs ..]\n";
+    exit 64;
 }
 
 sub load_config {
-  my ($arlet) = @_;
+    my ($arlet) = @_;
 
-  my $global_conf =
-    Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, 'defaults.ini' ),
-    'utf8' );
+    my $global_conf =
+      Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, 'defaults.ini' ),
+        'utf8' );
 
-  my $arlet_conf =
-    Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, "$arlet.ini" ), 'utf8' );
-  for my $key ( keys %$arlet_conf ) {
-    if ( !exists $global_conf->{$key} ) {
-      $global_conf->{$key} = $arlet_conf->{$key};
-    } else {
-      for my $subkey ( keys %{ $arlet_conf->{$key} } ) {
-        $global_conf->{$key}->{$subkey} = $arlet_conf->{$key}->{$subkey};
-      }
+    my $arlet_conf =
+      Config::Tiny->read( File::Spec->catfile( $Arlet_Dir, "$arlet.ini" ), 'utf8' );
+    for my $key ( keys %$arlet_conf ) {
+        if ( !exists $global_conf->{$key} ) {
+            $global_conf->{$key} = $arlet_conf->{$key};
+        } else {
+            for my $subkey ( keys %{ $arlet_conf->{$key} } ) {
+                $global_conf->{$key}->{$subkey} = $arlet_conf->{$key}->{$subkey};
+            }
+        }
     }
-  }
 
-  return $global_conf;
+    return $global_conf;
 }
 
 sub stdin2tmpfile {
-  $Tmp_Fh =
-    File::Temp->new( TMPDIR => 1, TEMPLATE => "$Prog_Name.stdin.XXXXXXXXXX" );
-  $Tmp_Fh->unlink_on_destroy(0) if $Flag_Show_Code;
-  $Tmp_Fh->print($_) while readline STDIN;
-  $Tmp_Fh->flush;
-  $Tmp_Fh->sync;
-  return $Tmp_Fh->filename;
+    $Tmp_Fh =
+      File::Temp->new( TMPDIR => 1, TEMPLATE => "$Prog_Name.stdin.XXXXXXXXXX" );
+    $Tmp_Fh->unlink_on_destroy(0) if $Flag_Show_Code;
+    $Tmp_Fh->print($_) while readline STDIN;
+    $Tmp_Fh->flush;
+    $Tmp_Fh->sync;
+    return $Tmp_Fh->filename;
 }
 
 __END__
@@ -220,6 +254,10 @@ Or then to fuss around with this data in R:
   > source("rc")
   > ...
 
+Or help for a arlet:
+
+  $ r-fu --help equichisq
+
 =head1 DESCRIPTION
 
 C<r-fu> is a R wrapper script that runs a named "arlet" (templated R code
@@ -228,25 +266,29 @@ glue to better integrate R into the unix command line environment.
 
 =head1 USAGE
 
-  $ r-fu [options] arletname [arletargs ..]
+  $ r-fu [options] arletname [--help] [arletargs ..]
 
 This program supports the following command line options:
 
 =over 4
 
-=item B<--output>=I<pdf|png>
+=item B<--all-help>
 
-Specify the format of the resulting graphic (if any).
-
-=item B<--width>=I<float>
-
-Width of the resulting graphic (if any). Should probably be in units
-sensible to the output format (PDF by default, though this may differ on a
-per-arlet basis).
+Concatenates the contents of all the C<*.help> files for the arlets to
+standard output and then quits C<r-fu>.
 
 =item B<--height>=I<float>
 
 Width of the resulting graphic (if any).
+
+=item B<--help>
+
+Shows help for an arlet and then exits.
+
+=item B<--output>=I<pdf|png>
+
+Specify the format of the resulting graphic (if any, some arlets just
+print text).
 
 =item B<--show-code>
 
@@ -261,14 +303,21 @@ either the C<defaults.ini> or arlet-specific C<*.ini> configuration.
 Enabling it may or may not produce useful information to standard out,
 depending on what the arlet does.
 
+=item B<--width>=I<float>
+
+Width of the resulting graphic (if any). Should probably be in units
+sensible to the output format (PDF by default, though this may differ on a
+per-arlet basis).
+
 =back
 
 =head1 ARLETS
 
-Templates to be filled in and passed to R, plus an optional C<*.conf> with
-template defaults (e.g. for width and height). These must be located in a
-directory that C<r-fu> is configured to look in, set by the C<ARLET_DIR>
-environment variable or C<~/share/arlets> otherwise.
+Templates to be filled in and passed to R, plus an optional C<*.conf>
+file with defaults (e.g. for width and height), plus a C<*.help> file
+with help. These must be located in a directory that C<r-fu> is
+configured to look in, set by the C<ARLET_DIR> environment variable or
+C<~/share/arlets> otherwise.
 
 L<Text::Template> is used to template the arlets.
 
@@ -277,6 +326,11 @@ L<Text::Template> is used to template the arlets.
 Arlets may have an optional C<arletname.ini> file, in addition to the global
 C<defaults.ini> from which various parameters may be set, in particular the
 default output format, how to handle I/O handles, and so forth.
+
+=head2 Help File
+
+An C<arletname.help> file, which is issued to standard error should the
+B<--help> option be passed to C<r-fu> along with an arlet name.
 
 =head1 BUGS
 

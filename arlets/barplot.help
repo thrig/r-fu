@@ -1,0 +1,9 @@
+barplot of all the data passed. Usage:
+
+  r-fu barplot datfile out.pdf
+  ... | r-fu barplot - out.pdf
+
+For example, word length frequencies:
+
+  awk '{print length}' /usr/share/dict/words | r-fu barplot - out.pdf
+

@@ -1,17 +1,8 @@
 # r-fu arlet template - install to ARLET_DIR directory
-#
-# xy plot data. Usage:
-#
-#   r-fu xy datfile out.pdf
-#   ... | r-fu xy - out.pdf
-#
-# where the 'datfile' or standard input contains two columns of X and Y data (R
-# is picky about input, so leading and trailing whitespace may need to be
-# trimmed, and a single space used to delimit the data).
-
-{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
 xy=read.table("{$args[0]}")
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
 plot(xy,type='b',lwd=2,pch=20,xlab='X',ylab='Y',tcl=-0.25,bty='n')
 lines(lowess(xy),col='purple',lty=2,lwd=2)

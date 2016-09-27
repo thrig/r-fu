@@ -1,0 +1,16 @@
+boxplot(s) of the input. Usage:
+
+  r-fu boxplot datfile out.pdf
+  ... | r-fu boxplot - out.pdf
+
+This will produce multiple boxplots with multiple columns:
+
+  % head -2 foo.csv 
+  22.00,21.37
+  21.16,20.85
+  % tr , ' ' < foo.csv | r-fu boxplot - out.pdf
+
+For a single boxplot of all the numbers, rework the input to be a
+single column:
+
+  % perl -nle 'print for m/([\d.]+)/ag' foo.csv | r-fu boxplot - out.pdf

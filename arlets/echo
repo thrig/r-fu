@@ -1,15 +1,4 @@
-# r-fu arlet template - install to ARLET_DIR directory
-#
-# Simple example showing (optionally) how to read arguments passed in by r-fu.
-#
-#   $ r-fu echo hi there
-#   [1] "hi"    "there"
-#   $ r-fu --show-code echo foo
-#   ...
-#
-# Note that the `cat` and `noquote` functions are handy to remove the cruft R
-# adds to the output (the leading [x] bits and quotes) though there might be
-# better ways to remove those I do not know about?
+# r-fu arlet EXAMPLE template
 
 args=commandArgs(trailingOnly=TRUE)
 args

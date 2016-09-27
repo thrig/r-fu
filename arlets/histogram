@@ -1,9 +1,6 @@
 # r-fu arlet template - install to ARLET_DIR directory
-#
-# Usage:
-#
-#   r-fu histogram datfile out.pdf
-#   ... | r-fu histogram - out.pdf
+
+x=scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
 
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
@@ -17,8 +14,6 @@ between = function(x,min,max) \{
   }
 \}
 
-thedat=read.table("{$args[0]}")
-
-hist(thedat$V1,plot=TRUE,main="",xlab="Range",breaks=between(trunc(sqrt(length(thedat$V1))),1,100));
+hist(x,plot=TRUE,main="",xlab="Range",breaks=between(trunc(sqrt(length(x))),1,100));
 
 dev.off()

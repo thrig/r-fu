@@ -1,0 +1,16 @@
+Graphs time complexity numbers in both normal and log-log form plus
+reference graphs for linear, square, cubic, and quadratic fits. Sample
+input data for the first file should contain something like:
+
+  1000 0.0024
+  2000 0.0077
+  4000 0.0306
+  8000 0.1258
+  16000 0.4815
+  32000 1.8844
+
+where x was the number of thingies done and y the time it took to
+perform the calculation on them. Output is to the second file on the
+command line:
+
+  r-fu timecomplex footimes out.pdf

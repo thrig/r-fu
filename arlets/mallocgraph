@@ -1,15 +1,8 @@
-# malloc.c output for 1..64 threads doing memsets 100 times, over 2**16 to
-# 2**37 worth of memory divided among that many threads. The resulting
-# images then tiled together using Imager::Tiler.
-#
-#   for ms in `seq 16 37`; do ( for t in `seq 1 64`; do ./malloc -l -c 100 -m $((2**$ms)) -t $t > result.$t; echo -n "$t "; r-fu msdevreduce result.$t ; done; ) > stats.$ms; done
-#   for x in `seq 16 37`; do r-fu mallocgraph stats.$x $x.png $(echo $((2**$x)) | humanize); done
-#
-# TODO title for graph would be nice but eh
-
-{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
+# r-fu arlet EXAMPLE template
 
 foo=read.table("{$args[0]}")
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
 par(mar=c(2,3,0.9,0.9) + 0.1);
 plot(foo$V2,type='h',pch=20,log='y',ylab='',xlab='',xaxt='n',yaxt='n',bty='n',lwd=2)

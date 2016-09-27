@@ -1,0 +1,17 @@
+Chi-squared test for equal distribution of all the numbers in the input.
+
+  r-fu equichisq datfile
+  ... | r-fu equichisq
+
+A p-value of 1 means the input values are perfectly equally distributed:
+
+  perl -E 'say for 1..6' | r-fu equichisq
+
+versus a somewhat less balanced die:
+
+  perl -E 'say for qw/1 1 1 1 1 1 1 1 1 2 3 4 5 6/' | r-fu equichisq
+
+NOTE that this calculation may give misleading results if the input is
+sparse, e.g. a six-sided die that for some reason never rolls six but
+is otherwise normal (a table with zero counts of six would need to be
+set in R).

@@ -1,17 +1,11 @@
 # r-fu arlet template - install to ARLET_DIR directory
-#
-# Mean and standard deviation reduction of (the first column) of data in input
-# file(s). The files are not concatenated.
-#
-#   r-fu msdevreduce out.*
-#   ... | r-fu msdevreduce -
 
 {
   my $tmpl;
   for my $file (@args) {
     $tmpl .= <<"EOT"
 thedat=read.table("$file", blank.lines.skip=TRUE)
-cat(sprintf("%.3f %.3f\\n", mean(thedat\$V1), sd(thedat\$V1)))
+cat(sprintf("%.3f %.3f\\n", mean(thedat\$V$column[0]), sd(thedat\$V$column[0])))
 EOT
   }
   $tmpl;

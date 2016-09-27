@@ -1,22 +1,16 @@
 # r-fu arlet template - install to ARLET_DIR directory
-#
-# barplot data. Usage:
-#
-#   r-fu barplot datfile out.pdf
-#   ... | r-fu barplot - out.pdf
-#
-# For example, word-length frequencies:
-#
-#   awk '{print length}' /usr/share/dict/words | r-fu barplot - out.pdf
 
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
-thedat=read.table("{$args[0]}");
+# read.table does wacky things with table() so just slurp it all into
+# single list
+x=scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
 
 # like this better than boxy barplot, also easier to put the quantile stuff
 # on top of...
-plot(table(thedat),type='h',bty='n',xlab='Value',ylab='Frequency',tcl=-0.25)
-rect(quantile(thedat$V1, probs=c(0.25),names=FALSE), 0, quantile(thedat$V1,probs=c(0.75),names=FALSE), -100, lwd=2,col='grey',border='grey')
-rect(mean(thedat$V1), 0, mean(thedat$V1), -1000, lwd=2)
+plot(table(x),type='h',bty='n',xlab='Value',ylab='Frequency',tcl=-0.25)
+rect(quantile(x,probs=c(0.25),names=FALSE),0,quantile(x,probs=c(0.75),names=FALSE),-100,lwd=2,col='grey',border='grey')
+mm=mean(x)
+rect(mm,0,mm,-1000,lwd=2)
 
 dev.off()
