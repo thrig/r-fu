@@ -1,9 +1,9 @@
 # r-fu arlet template - install to ARLET_DIR directory
 
 {
-  my %methods = (
+  our %methods = (
     kendall  => 'method="kendal",alternative="two.sided"',
-    pearson  => 'method="pearson",alternative="two.sided",conf.level=0.95',
+    pearson  => 'method="pearson",alternative="two.sided",conf.level='.$ipvalue,
     spearman => 'method="spearman",alternative="two.sided"',
   );
 

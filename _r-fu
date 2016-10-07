@@ -14,11 +14,14 @@ adir=${ARLET_DIR:-~/share/arlets}
 # arlet files. Easy would be a 'usage' line in the arlet.conf that r-fu could
 # emit when anything goes awry.
 _arguments -s \
-  '(--help -h)--width=[graph width]:value:' \
-  '(--help -h)--height=[graph height]:value:' \
-  '(--help -h)--show-code[only show R code]' \
-  '(--help -h)--show-stdout[emit stdout from R]' \
-  '(- *)'{-h,--help}'[display help]' \
+  '(--all-help --help -h)--column=[column to select]:value:(1)' \
+  '(--all-help --help -h)--height=[graph height]:value:' \
+  '(--all-help --help -h)--p-value=[p-value]:value:(0.05)' \
+  '(--all-help --help -h)--show-code[only show R code]' \
+  '(--all-help --help -h)--show-stdout[emit stdout from R]' \
+  '(--all-help --help -h)--width=[graph width]:value:' \
+  '(- *)'{-h,--help}'[display help for arlet]' \
+  '(- *)'{--all-help}'[display help for all arlets]' \
   '1:arlet:_files -g "[a-z]*~*.*" -W $adir' \
   '*:files:_files' \
   && return 0

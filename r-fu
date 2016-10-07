@@ -43,11 +43,10 @@ GetOptions(
     'help|h|?'     => \my $Flag_Help,
     'width=f'      => \my $Flag_Width,
     'height=f'     => \my $Flag_Height,
+    'p-value|p=f'  => \my $Flag_Pvalue,
     'show-code'    => \my $Flag_Show_Code,
     'show-stdout'  => \my $Flag_Show_Stdout,
 ) or do { warn "$Prog_Name: error parsing options\n"; emit_help() };
-
-@Flag_Column = (1) if !@Flag_Column;
 
 # perhaps if when searching for something in the docs?
 if ($Flag_All_Help) {
@@ -77,6 +76,13 @@ if ($Flag_Help) {
 my $arlet_file = File::Spec->catfile( $Arlet_Dir, $arlet );
 
 die "$Prog_Name: cannot read arlet file '$arlet_file'\n" if !-r $arlet_file;
+
+@Flag_Column = (1) if !@Flag_Column;
+if ( defined $Flag_Pvalue ) {
+    die "p-value out of range" if $Flag_Pvalue > 1 or $Flag_Pvalue <= 0;
+} else {
+    $Flag_Pvalue = 0.05;
+}
 
 ##############################################################################
 #
@@ -131,15 +137,18 @@ if ( $Config->{_}->{read_stdin} ) {
 }
 
 my $dev      = $Config->{device}->{device};
-my %template = (
+#                                                    TEMPLATE VALUES
+my %tvalues = (
+    Prog_Name  => $Prog_Name,
     args       => \@ARGV,
     arlet      => $arlet,
     arlet_file => $arlet_file,
     column     => \@Flag_Column,
     device     => $dev,
-    width      => $Config->{device}->{ $dev . '_width' },
     height     => $Config->{device}->{ $dev . '_height' },
-    Prog_Name  => $Prog_Name,
+    pvalue     => $Flag_Pvalue,
+    ipvalue    => 1 - $Flag_Pvalue,
+    width      => $Config->{device}->{ $dev . '_width' },
 );
 
 my $tmpl = Text::Template->new( TYPE => 'FILE', SOURCE => $arlet_file )
@@ -147,7 +156,7 @@ my $tmpl = Text::Template->new( TYPE => 'FILE', SOURCE => $arlet_file )
 my $rcode = $tmpl->fill_in(
     BROKEN =>
       sub { my %h = @_; die "$Prog_Name: error filling in template: " . $h{error} },
-    HASH => \%template
+    HASH => \%tvalues
 ) or die "$Prog_Name: could not fill in the template: $Text::Template::ERROR";
 
 if ($Flag_Show_Code) {
@@ -229,6 +238,9 @@ r-fu - template and feed named code templates to R
 
 =head1 SYNOPSIS
 
+Run-times for an algorithm using different numbers of inputs, graphed to
+see whether the algorithm is linear or some higher order:
+
   $ cat times
   1000 0.0024
   2000 0.0077
@@ -238,23 +250,23 @@ r-fu - template and feed named code templates to R
   32000 1.8844
   $ r-fu timecomplex times out.pdf
 
-Or, reading from standard input (and temporary files):
+Or, the same only reading from standard input
 
-  $ r-fu timecomplex - out.pdf < times
+  $ ... | r-fu timecomplex - out.pdf
 
-Or, to see the code that would be passed to R:
+Or, to see the code that would be passed to R
 
   $ r-fu --show-code timecomplex times out.pdf
   ...
 
-Or then to fuss around with this data in R:
+Or then to fuss around with this data in R
 
   $ r-fu --show-code timecomplex times out.pdf > rc
   $ R
   > source("rc")
   > ...
 
-Or help for a arlet:
+Or help for a arlet
 
   $ r-fu --help equichisq
 
@@ -277,6 +289,10 @@ This program supports the following command line options:
 Concatenates the contents of all the C<*.help> files for the arlets to
 standard output and then quits C<r-fu>.
 
+=item B<--column>=I<column-number>
+
+What column(s) to select, if the arlet supports that.
+
 =item B<--height>=I<float>
 
 Width of the resulting graphic (if any).
@@ -285,10 +301,10 @@ Width of the resulting graphic (if any).
 
 Shows help for an arlet and then exits.
 
-=item B<--output>=I<pdf|png>
+=item B<--p-value>=I<p-value>
 
-Specify the format of the resulting graphic (if any, some arlets just
-print text).
+P-value to use, by default 0.05, if the arlet uses that. Also exposed as
+C<$ipvalue> to arlets for the C<1 - pvalue> value.
 
 =item B<--show-code>
 
@@ -319,7 +335,8 @@ with help. These must be located in a directory that C<r-fu> is
 configured to look in, set by the C<ARLET_DIR> environment variable or
 C<~/share/arlets> otherwise.
 
-L<Text::Template> is used to template the arlets.
+L<Text::Template> is used to template the arlets, look for C<TEMPLATE
+VALUES> in the C<r-fu> source for what variables are passed.
 
 =head2 Config File
 
