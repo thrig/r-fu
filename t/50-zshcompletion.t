@@ -6,10 +6,11 @@
 
 puts 1..1
 
-if {[file exists .zcompdump]} { exec rm .zcompdump }
-
 set prompt "# "
 set env(PS1) $prompt
+
+set env(ZDOTDIR) .
+if {[file exists .zcompdump]} { exec rm .zcompdump }
 
 spawn -noecho zsh -f
 # less terminal spam
@@ -18,12 +19,10 @@ expect -ex $prompt
 
 # find the _r-fu completion in this repo (but do need the global $fpath
 # as that contains the function definition files for compinit itself...)
-send -- {fpath=(. $fpath)}
-send -- "\r"
+send -- "fpath=([pwd] \$fpath)\r"
 expect -ex $prompt
 # -C is to omit the various security checks on completion dirs
-send -- {autoload -U compinit && compinit -C}
-send -- "\r"
+send -- "autoload -U compinit && compinit -C\r"
 
 set tapout "not ok 1 - result not set by testing"
 
