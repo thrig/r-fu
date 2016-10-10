@@ -4,7 +4,6 @@
 
 $ENV{ARLET_DIR} = './arlets';
 
-use File::Spec ();
 use Test::Cmd;
 use Test::Most tests => 3 * 16;
 
