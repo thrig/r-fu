@@ -2,9 +2,23 @@
 #
 # Messy due to mixed output with test terminal but appears to more or
 # less confirm that at least the ZSH completion for "r-fu -\t" produces
-# some expected output.
+# some expected output. (Written in TCL as I got the TCL version of this
+# test working before the perl Expect one.)
 
 puts 1..1
+
+set zsh ""
+foreach dir [split $env(PATH) ":"] {
+    if {[file executable "$dir/zsh"]} {
+        set zsh "$dir/zsh"
+        break
+    }
+}
+if {$zsh eq ""} {
+    puts stderr "# notice: zsh not found, skipping zsh completion tests"
+    puts "ok 1 # skip zsh not found"
+    exit
+}
 
 set prompt "# "
 set env(PS1) $prompt
@@ -12,7 +26,7 @@ set env(PS1) $prompt
 set env(ZDOTDIR) .
 if {[file exists .zcompdump]} { exec rm .zcompdump }
 
-spawn -noecho zsh -f
+spawn -noecho $zsh -f
 # less terminal spam
 #stty -echo
 expect -ex $prompt
@@ -27,8 +41,7 @@ send -- "autoload -U compinit && compinit -C\r"
 set tapout "not ok 1 - result not set by testing"
 
 expect -ex $prompt
-send -- {r-fu -}
-send -- "\t"
+send -- "r-fu -\t"
 expect {
     -ex "--width" {
         if {[regexp "display help for arlet" $expect_out(buffer)]} {
