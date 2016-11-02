@@ -8,7 +8,7 @@ x=scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
 
 # like this better than boxy barplot, also easier to put the quantile stuff
 # on top of...
-plot(table(x),type='h',bty='n',xlab='Value',ylab='Frequency',tcl=-0.25)
+plot(table(x),type='h',bty='n',xlab='{$xlabel//"Value"}',ylab='{$ylabel//"Frequency"}',tcl=-0.25)
 rect(quantile(x,probs=c(0.25),names=FALSE),0,quantile(x,probs=c(0.75),names=FALSE),-100,lwd=2,col='grey',border='grey')
 mm=mean(x)
 rect(mm,0,mm,-1000,lwd=2)

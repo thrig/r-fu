@@ -5,7 +5,7 @@
 theys=read.csv("{$args[0]}",header=FALSE)
 aut=1:length(theys$V1)
 
-plot(NULL,type='l',xlab='Arbitrary Unit of Time',ylab='',tcl=-0.25,bty='n',xlim=range(aut),ylim=c(min(theys),max(theys)))
+plot(NULL,type='l',xlab='{$xlabel//"Arbitrary Unit of Time"}',ylab='{$ylabel//""}',tcl=-0.25,bty='n',xlim=range(aut),ylim=c(min(theys),max(theys)))
 
 ctable=rainbow(length(theys))
 cidx=1

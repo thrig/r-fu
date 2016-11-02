@@ -25,7 +25,7 @@ quads$y = mean( thedat$y / (thedat$x ** 4) ) * quads$x ** 4
 
 par(mfcol=c(1,2))
 
-plot(thedat$x,thedat$y,type='n',bty='n',ylab='Time',xlab='Operations',tcl=-0.25)
+plot(thedat$x,thedat$y,type='n',bty='n',ylab='{$ylabel//"Time"}',xlab='{$xlabel//"Operations"}',tcl=-0.25)
 
 lines(linear,col='#333333',lwd=1)
 lines(sqs,lty=2,col='#333333',lwd=1)

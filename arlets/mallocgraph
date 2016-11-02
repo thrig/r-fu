@@ -5,7 +5,7 @@ foo=read.table("{$args[0]}")
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
 par(mar=c(2,3,0.9,0.9) + 0.1);
-plot(foo$V2,type='h',pch=20,log='y',ylab='',xlab='',xaxt='n',yaxt='n',bty='n',lwd=2)
+plot(foo$V2,type='h',pch=20,log='y',ylab='{$ylabel//""}',xlab='{$xlabel//""}',xaxt='n',yaxt='n',bty='n',lwd=2)
 tp=c(1,2,4,8,12,16,24,32,40,48,64);
 axis(side=1, at=tp,tcl=-0.25);
 

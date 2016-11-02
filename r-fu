@@ -31,6 +31,7 @@ use Text::Template ();
 
 my $Arlet_Dir = $ENV{ARLET_DIR}
   || File::Spec->catfile( File::HomeDir->my_home, "share/arlets" );
+
 my @R_Command =
   qw(R --encoding=UTF-8 --no-restore --no-save --quiet --slave --args);
 
@@ -46,6 +47,8 @@ GetOptions(
     'p-value|p=f'  => \my $Flag_Pvalue,
     'show-code'    => \my $Flag_Show_Code,
     'show-stdout'  => \my $Flag_Show_Stdout,
+    'xlabel=s'     => \my $Flag_Xlabel,
+    'ylabel=s'     => \my $Flag_Ylabel,
 ) or do { warn "$Prog_Name: error parsing options\n"; emit_help() };
 
 # perhaps if when searching for something in the docs?
@@ -107,9 +110,15 @@ if (@ARGV) {
 }
 
 if ( defined $Flag_Width ) {
+    if ( !defined $Config->{device}->{device} ) {
+        die "width set but no device found in $arlet.ini config file\n";
+    }
     $Config->{device}->{ $Config->{device}->{device} . '_width' } = $Flag_Width;
 }
 if ( defined $Flag_Height ) {
+    if ( !defined $Config->{device}->{device} ) {
+        die "width set but no device found in $arlet.ini config file\n";
+    }
     $Config->{device}->{ $Config->{device}->{device} . '_height' } =
       $Flag_Height;
 }
@@ -136,7 +145,7 @@ if ( $Config->{_}->{read_stdin} ) {
     }
 }
 
-my $dev      = $Config->{device}->{device};
+my $dev = $Config->{device}->{device};
 #                                                    TEMPLATE VALUES
 my %tvalues = (
     Prog_Name  => $Prog_Name,
@@ -149,6 +158,8 @@ my %tvalues = (
     pvalue     => $Flag_Pvalue,
     ipvalue    => 1 - $Flag_Pvalue,
     width      => $Config->{device}->{ $dev . '_width' },
+    xlabel     => $Flag_Xlabel,
+    ylabel     => $Flag_Ylabel,
 );
 
 my $tmpl = Text::Template->new( TYPE => 'FILE', SOURCE => $arlet_file )
@@ -324,6 +335,14 @@ depending on what the arlet does.
 Width of the resulting graphic (if any). Should probably be in units
 sensible to the output format (PDF by default, though this may differ on a
 per-arlet basis).
+
+=item B<--xlabel>=I<value>
+
+Sets a custom C<xlab> value, assuming the arlet uses that.
+
+=item B<--ylabel>=I<value>
+
+Sets a custom C<ylab> value, assuming the arlet uses that.
 
 =back
 

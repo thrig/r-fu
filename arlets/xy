@@ -4,7 +4,7 @@ xy=read.table("{$args[0]}")
 
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
-plot(xy,type='b',lwd=2,pch=20,xlab='X',ylab='Y',tcl=-0.25,bty='n')
+plot(xy,type='b',lwd=2,pch=20,xlab='{$xlabel//"X"}',ylab='{$ylabel//"Y"}',tcl=-0.25,bty='n')
 lines(lowess(xy),col='purple',lty=2,lwd=2)
 
 dev.off()
