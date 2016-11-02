@@ -1,11 +1,19 @@
-Input columns (in CSV) are assumed to be lines to be plotted in parallel,
-with no X data supplied.
+Input columns are assumed to be lines to be plotted in parallel, with no
+X data supplied (X is implicit from the line number).
 
-  % head -2 foo.csv 
-  22.00,21.37
-  21.16,20.85
-  % r-fu linesnox foo.csv out.pdf
+  % head -2 foo
+  22.00 21.37
+  21.16 20.85
+  % r-fu linesnox foo out.pdf
   % ... | r-fu linesnox - out.pdf
 
 Practical uses might be for data readings from N sensors (e.g.
-temperature probes) over some period of (unmarked) time.
+temperature probes) over some period of (unmarked) time, or to graph
+what N training runs of a neural network produce (where `nntrain` would
+print the training result to a new line for each iteration):
+
+  % for i in {1..20}; do ./nntrain > out$i; done
+  % head -2 out1 
+  0.596204
+  0.582019
+  % paste out* | r-fu linesnox --xlabel=Iteration - wer.pdf

@@ -2,7 +2,7 @@
 
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
-theys=read.csv("{$args[0]}",header=FALSE)
+theys=read.table("{$args[0]}",header=FALSE)
 aut=1:length(theys$V1)
 
 plot(NULL,type='l',xlab='{$xlabel//"Arbitrary Unit of Time"}',ylab='{$ylabel//""}',tcl=-0.25,bty='n',xlim=range(aut),ylim=c(min(theys),max(theys)))

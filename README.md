@@ -40,8 +40,14 @@ Motivation for this NIH system: other options, such as learning R more
 soas to be comfortable in its REPL, or using some webby thing or knitr,
 do not suit the Unix + Perl + C + no Internet environment I spend most
 of my time in, and my prior practice of copying and pasting random R
-commands from who knows where did not promote proper scriptability (see
-also Statistics::NiceR in the perl world).
+commands from who knows where did not promote proper scriptability:
+
+    for i in {1..20}; do ./nntrain > out$i; done
+    paste out* | r-fu linesnox --xlabel=Iteration - training.png
+
+![Training results for a neural net](training.png)
+
+See also Statistics::NiceR for another Perl integration with R.
 
 And now, what you've all been waiting for.
 
