@@ -4,7 +4,11 @@ xy=read.table("{$args[0]}")
 
 {$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
 
-plot(xy,type='b',lwd=2,pch=20,xlab='{$xlabel//"X"}',ylab='{$ylabel//"Y"}',tcl=-0.25,bty='n')
-lines(lowess(xy),col='purple',lty=2,lwd=2)
+# 'b'oth 'p'oints and 'l'ines
+{ our $type = $args[2] // 'b'; '' }
+
+plot(xy,type='{$type}',lwd=2,pch=20,xlab='{$xlabel//"X"}',ylab='{$ylabel//"Y"}',tcl=-0.25,bty='n')
+# lowess fit unless just 'p'oints
+{ $type ne 'p' && "lines(lowess(xy),col='purple',lty=2,lwd=2)" }
 
 dev.off()

@@ -1,7 +1,10 @@
-xy plot data with log/log axes. Usage:
+xy plot data with log/log axes (with lowess unless 'p'oints. Usage:
 
   r-fu xyloglog datfile out.pdf
   ... | r-fu xyloglog - out.pdf
+
+  # 'p'oints instead of 'l'ines or the default 'b'oth
+  r-fu xyloglog datfile out.pdf p
 
 where the 'datfile' or standard input contains two columns of X and Y
 data (R is picky about input, so leading and trailing whitespace may

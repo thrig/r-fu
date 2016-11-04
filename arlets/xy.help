@@ -1,4 +1,4 @@
-xy plot data. Usage:
+xy plot data, plus lowess fit (unless just 'p'oints). Usage:
 
   r-fu xy datfile out.pdf
   ... | r-fu xy - out.pdf
@@ -6,3 +6,9 @@ xy plot data. Usage:
 where the 'datfile' or standard input contains two columns of X and Y
 data (R is picky about input, so leading and trailing whitespace may
 need to be trimmed, and a single space used to delimit the data).
+
+An optional third argument allows the plot type to be specified (default
+is 'b'oth 'p'oints and 'l'ines):
+
+  r-fu xy datfile out.pdf p
+
