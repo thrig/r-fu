@@ -1,0 +1,6 @@
+# r-fu arlet template - install to ARLET_DIR directory
+
+x=scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
+y=scan("{$args[1]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
+
+ansari.test(x,y,alternative="two.sided");
