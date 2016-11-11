@@ -1,0 +1,10 @@
+T-test for difference in sample means.
+
+The files should contain the same number of elements though will be
+truncated if one is longer (not using pairwise samples may defeat the
+point of the test).
+
+  r-fu ttestmean [--p-value=0.05] file-initial file-final
+
+See also the ansaribradley and bartlettvariance arlets to test different
+aspects of distributions.

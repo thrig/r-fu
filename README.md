@@ -6,10 +6,10 @@ to R. See the "arlets" directory for the available templates of R code.
 Basically this is some glue to help make R work better from the unix
 command line (or Makefile, etc.) environment.
 
-Assuming that all the required Perl modules are installed from CPAN (r-
-fu will complain about these if they are not installed), a quick test
-might look like:
+Assuming that perl and App::cpanminus are installed, a quick test might
+look like:
 
+    $ make depend
     $ env ARLET_DIR=arlets ./r-fu echo test
     [1] "test"
 

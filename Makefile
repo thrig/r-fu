@@ -1,6 +1,9 @@
-test:
-	@perl -MApp::Prove -MTest::Cmd -MTest::Most -le 'print "have perl reqs"'
+# Assuming perl and App::cpanminus and expect are installed...
+depend:
+	@cpanm --installdeps .
 	@expect -c "puts {have expect}"
+
+test:
 	@prove
 
 clean:

@@ -1,3 +1,7 @@
-ansari.test on the scan()'d contents of the given files.
+ansari.test on the scan()'d contents of the given files: do two
+independent samples come from the same distribution?
 
   r-fu ansaribradley filea fileb
+
+See also the bartlettvariance and ttestmean arlets to test different
+aspects of distributions.

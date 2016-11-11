@@ -1,0 +1,6 @@
+Bartlett test for similarity of variances.
+
+  r-fu bartlettvariance filea fileb
+
+See also the ansaribradley and ttestmean arlets to test different
+aspects of distributions.

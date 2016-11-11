@@ -1,0 +1,14 @@
+# r-fu arlet template - install to ARLET_DIR directory
+#
+# Bartlett's can take three or more samples, though that has not been
+# coded up here.
+
+x=scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
+xlen=length(x)
+g=rep("X",xlen)
+
+x=append(x,scan("{$args[1]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE))
+ylen=length(x)-xlen
+g=append(g,rep("Y",ylen))
+
+bartlett.test(x,g)

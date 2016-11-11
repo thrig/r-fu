@@ -1,0 +1,13 @@
+# r-fu arlet template - install to ARLET_DIR directory
+
+x=scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
+y=scan("{$args[1]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
+
+if(length(x) != length(y)) \{
+  cat("\n *** warning: input files differ in length, going procrustean ***\n")
+  atmost=min(length(x),length(y))
+  length(x)=atmost
+  length(y)=atmost
+\}
+
+t.test(y,x,alternative="two.sided",paired=TRUE,conf.level={$ipvalue});
