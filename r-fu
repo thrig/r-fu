@@ -277,6 +277,10 @@ Or then to fuss around with this data in R
   > source("rc")
   > ...
 
+Or with feed(1) installed:
+
+  $ r-fu --show-code ... | feed - R ...
+
 Or help for a arlet
 
   $ r-fu --help equichisq
@@ -398,13 +402,14 @@ Other R projects in a similar vein only different or more formal include
 L<http://yihui.name/knitr/> and L<http://www.rstudio.com/> and
 L<http://projecttemplate.net>.
 
+L<feed(1)>, L<Text::Template>
+
 =head1 AUTHOR
 
 thrig - Jeremy Mates (cpan:JMATES) C<< <jmates at cpan.org> >>
 
 =head1 COPYRIGHT
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+Copyright (C) 2014-2016 by Jeremy Mates
 
 =cut
