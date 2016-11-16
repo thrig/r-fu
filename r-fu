@@ -402,7 +402,7 @@ Other R projects in a similar vein only different or more formal include
 L<http://yihui.name/knitr/> and L<http://www.rstudio.com/> and
 L<http://projecttemplate.net>.
 
-L<feed(1)>, L<Text::Template>
+L<feed(1)>, GNU datamash, L<Text::Template>
 
 =head1 AUTHOR
 

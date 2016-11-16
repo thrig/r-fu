@@ -47,7 +47,8 @@ commands from who knows where did not promote proper scriptability:
 
 ![Training results for a neural net](training.png)
 
-See also Statistics::NiceR for another Perl integration with R.
+See also Statistics::NiceR for another Perl integration with R, or GNU
+datamash for another option for command line data wrangling.
 
 And now, what you've all been waiting for.
 
