@@ -5,7 +5,8 @@
 $ENV{ARLET_DIR} = './arlets';
 
 use Test::Cmd;
-use Test::Most tests => 3 * 16;
+use Test::Most tests => 4 * 19;
+use Test::UnixExit;
 
 my $test_prog = './r-fu';
 
@@ -25,4 +26,5 @@ while ( my $arlet = readdir $dh ) {
     ok( defined $out && length $out > 0, "$arlet --help had output" );
     ok( $out =~ m/\Q$arlet/, "$arlet --help contains arlet name" );
     is( $Test_Cmd->stderr, "", "no stderr for $arlet --help" );
+    exit_is( $?, 64, "usage exit code of sysexits(3)" );
 }

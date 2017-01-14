@@ -1,0 +1,185 @@
+.Dd January 13 2017
+.Dt R-FU 1
+.nh
+.Os
+.Sh NAME
+.Nm r-fu
+.Nd template and feed named code templates to R
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl o Ar png|pdf
+.Cm --column= Ns Ar col
+.Cm --feed
+.Cm --width= Ns Ar num
+.Cm --height= Ns Ar num
+.Cm --p-value= Ns Ar num
+.Cm --show-code
+.Cm --show-stdout
+.Cm --xlabel= Ns Ar name
+.Cm --ylabel= Ns Ar name
+.Ar arlet
+.Op Ar arlet-args ..
+.Ek
+.Sh DESCRIPTION
+.Nm
+is a R wrapper script that runs a named "arlet" (templated R code
+plus optional configuration files with defaults) through R. Basically some
+glue to better integrate R into the unix command line environment.
+Options:
+.Bl -tag -width Ds
+.It Cm --all-help
+Concatenates the contents of all the
+.Pa *.help
+files for the arlets to standard output and then quits
+.Nm .
+.It Cm --column= Ns Ar column-number
+What column(s) to select, if the
+.Ar arlet
+supports that.
+.It Cm --height= Ns Ar float
+Width of the resulting graphic (if any). Appropriate values depend on the
+.Ar arlet ,
+any data passed to that, and the specific output device used. Defaults
+for various output forms may be set in the
+.Ar arlet
+configuration files; see
+.Pa defaults.ini
+for the default values.
+.It Cm --help Ar arlet
+Shows help for an arlet and then exits.
+.It Cm --p-value= Ns Ar p-value
+P-value to use, by default 0.05, if the arlet uses that. Also exposed as
+.Dv $ipvalue
+to arlets for the
+.Qq 1 - pvalue
+value.
+.It Cm --show-code
+Does not run R; instead shows the templated R code that would be passed
+to R on standard out.
+.It Cm --show-stdout
+Shows the standard output from R. This may be disabled by default in
+either
+.Pa defaults.ini
+or an arlet-specific
+.Pa *.ini
+configuration. Enabling it may or may not produce useful information to
+standard out, depending on the arlet.
+.It Cm --width= Ns Ar float
+Width of the resulting graphic (if any). See
+.Cm --height
+option for additional discussion.
+.It Cm --xlabel= Ns Ar name
+Sets a custom 
+.Cm xlab
+value, assuming the arlet generates R plots.
+.It Cm --ylabel= Ns Ar name
+Sets a custom
+.Cm ylab
+value, assuming the arlet generates R plots.
+.El
+.Sh ENVIRONMENT
+The directory for the
+.Ar arlet
+can be modified by setting the
+.Ev ARLET_DIR
+environment variable, which is if unset
+.Pa $HOME/share/arlets .
+.Sh FILES
+Arlets are templates to be filled in and passed to R, plus an optional
+.Pa *.conf
+file with defaults (e.g. for width and height), plus a
+.Pa *.help
+file with help. These must be located in a directory that
+.Nm
+is configured to look in, set by the
+.Ev ARLET_DIR
+environment variable or
+.Pa $HOME/share/arlets
+otherwise.
+.Pp
+.Xr Text::Template 3pm
+is used to template the arlets, look for 
+.Dv TEMPLATE VALUES
+in the 
+.Nm
+source for what variables are passed to the template, and study existing
+.Ar arlet .
+.Pp
+Various
+.Pa *.ini
+files can be used for additional customization of the
+.Ar arlet .
+See
+.Pa defaults.ini
+for defaults read by all.
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+These require that
+.Nm
+has been installed and the arlets properly configured.
+.Pp
+Run-times for an algorithm using different numbers of inputs, graphed to
+see whether the algorithm is linear or some higher order.
+.Pp
+.Dl $ Ic cat times
+.Dl 1000 0.0024
+.Dl 2000 0.0077
+.Dl 4000 0.0306
+.Dl 8000 0.1258
+.Dl 16000 0.4815
+.Dl 32000 1.8844
+.Dl $ Ic r-fu timecomplex times out.pdf
+.Pp
+Or, the same only reading from standard input
+.Pp
+.Dl $ Ic ... \&| r-fu timecomplex - out.pdf
+.Pp
+Or, to see the code that would be passed to R
+.Pp
+.Dl $ Ic r-fu --show-code timecomplex times out.pdf
+.Dl ...
+.Pp
+Or then to fuss around with this data in R
+.Pp
+.Dl $ Ic r-fu --show-code timecomplex times out.pdf > rc
+.Dl $ Ic R
+.Dl > Ic source("rc")
+.Dl > Ic ...
+.Pp
+Or with
+.Xr feed 1
+installed:
+.Pp
+.Dl $ Ic r-fu --show-code ... \&| feed - R ...
+.Pp
+Or help for an arlet
+.Pp
+.Dl $ Ic r-fu --help equichisq
+.Dl ...
+.Sh SEE ALSO
+.Xr feed 1 ,
+.Xr R 1 ,
+.Xr Text::Template 3pm
+.Pp
+http://www.r-project.org/
+.Pp
+Other R projects in a similar vein include
+.Pp
+http://yihui.name/knitr/
+http://www.rstudio.com/
+http://projecttemplate.net/
+.Xr Statistics::NiceR 3pm
+.Pp
+Another command line tool that can perform data wrangling is GNU datamash.
+.Sh AUTHOR
+.An Jeremy Mates
+.Sh CAVEATS
+Buggy arlet code will doubtless cause R (or possibly
+.Nm )
+to blow up in strange ways.
+.Pp
+The graphics device prints some random messages, would be nice to find a
+way to turn those off, so arlet code could generate both a graph and
+make unpolluted output to standard out.

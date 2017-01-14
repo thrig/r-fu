@@ -9,4 +9,5 @@ requires 'Getopt::Long';
 requires 'IPC::Run3';
 requires 'Test::Cmd';
 requires 'Test::Most';
+requires 'Test::UnixExit';
 requires 'Text::Template';

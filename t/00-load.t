@@ -1,8 +1,9 @@
 #!perl
 use Test::More tests => 1;
+use Test::UnixExit;
 
 diag("Testing r-fu, Perl $], $^X");
 
 qx"$^X -c ./r-fu";
 
-is( $? >> 8, 0, 'syntax check' ) || print "Bail out!\n";
+exit_is( $?, 0, 'syntax check' ) || print "Bail out!\n";

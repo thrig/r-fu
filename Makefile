@@ -1,7 +1,7 @@
 # Assuming perl and App::cpanminus and expect are installed...
 depend:
 	@cpanm --installdeps .
-	@expect -c "puts {have expect}"
+	@expect -c "package require Tcl 8.5;"
 
 test:
 	@prove
