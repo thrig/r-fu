@@ -3,6 +3,6 @@
 x=scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE)
 
 hilo=range(x)
-cat(sprintf("elements %d mean %.3f range %.3f sd %.3f\n\n", length(x), mean(x), hilo[2] - hilo[1], sd(x)))
+cat(sprintf("elements %d mean %.3f range %.3f min %.3f max %.3f sd %.3f\n\n", length(x), mean(x), hilo[2] - hilo[1], min(x), max(x), sd(x)))
 noquote(quantile(x, names=TRUE, type=8))
 cat("\n")
