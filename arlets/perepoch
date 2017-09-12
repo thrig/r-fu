@@ -1,0 +1,12 @@
+# r-fu arlet template - install to ARLET_DIR directory
+
+{$device}(file="{$args[1]}", bg="white", width={$width}, height={$height});
+
+x=read.table("{$args[0]}");
+
+names(x)=c('date','value');
+x$date = strptime(x$date,"%s");
+
+plot(x,type='l');
+
+dev.off();

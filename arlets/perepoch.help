@@ -1,0 +1,8 @@
+Graphs values assuming the input consists of epoch times and then a
+numeric value, e.g. events per second:
+
+    $ cat foo
+    1505273952 10
+    1505275953 3
+    1505287878 1
+    $ r-fu perepoch foo out.pdf
