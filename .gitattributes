@@ -1,0 +1,2 @@
+t/50-zshcompletion.t linguist-language=TCL
+*.t linguist-language=Perl
