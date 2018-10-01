@@ -1,0 +1,2 @@
+# r-fu arlet template - install to ARLET_DIR directory
+table(scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE))
