@@ -1,0 +1,5 @@
+# r-fu arlet template - install to ARLET_DIR directory
+x=table(scan("{$args[0]}",n=-1,quiet=TRUE,blank.lines.skip=TRUE,strip.white=TRUE))
+c=cumsum(x)
+m=max(c)
+write.table(format(c/m*100,digits=3),quote=FALSE,col.names=FALSE,sep="\t")
