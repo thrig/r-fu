@@ -3,5 +3,5 @@ Summary stats about the numbers passed:
   r-fu summary datfile
   ... | r-fu summary -
 
-This includes the range, mean, standard deviation, quantile,
+This includes the range, mean, standard deviation, quantile (type 8) etc
 
